@@ -5,9 +5,10 @@ class Adatbazis:
     def __init__(self) -> None:
         self.db = mysql.connector.connect(
                 host= 'localhost',
-                username= 'root',
+                user= 'root',
                 password= '',
                 database= 'chatApp'
+        
         )
         
     def getAllRooms(self):
