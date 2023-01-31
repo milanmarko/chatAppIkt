@@ -2,6 +2,8 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdi
 from PyQt5.QtCore import Qt, pyqtSignal
 import hashlib, requests
 
+global usernameGlobal
+usernameGlobal = ""
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()  
     
@@ -185,17 +187,88 @@ class LoginWindow(QWidget):
         r = requests.post('http://localhost:5000/account/login', {"userName": username, "password": password})
         r = r.json()
         if r["sikeresE"]:
+            global usernameGlobal
+            usernameGlobal = username
             self.sikeresLogin.emit()
+        else:
+            msg = QMessageBox()
+            msg.setText("Hibás felhasználónév és/vagy jelszó!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Sikertelen bejelentkezés")
+            msg.exec_()
+            
 
 class MainMenu(QWidget):
     def __init__(self):
         super(MainMenu, self).__init__()
         
-        self.setWindowTitle("ChatApp")
+        self.setWindowTitle("Chat App")
         
         self.setFixedSize(1000,700)
         
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        [self.layout.setColumnStretch(i, 1) for i in range(1)]
+        [self.layout.setRowStretch(i, 1) for i in range(5)]
+
+        
+        
+        
+    def updateAfterLogin(self):
+        self.usernameLabel = QLabel(f"Bejelentkezve mint: {usernameGlobal}")
+        self.font_ = self.usernameLabel.font()
+        self.font_.setPointSize(20)
+        self.usernameLabel.setFont(self.font_)
+        self.layout.addWidget(self.usernameLabel, 0, 0, Qt.AlignTop | Qt.AlignHCenter)
+        
+        self.createNewRoomButton = QPushButton("Új szoba létrehozása")
+        self.createNewRoomButton.setFixedSize(300, 75)
+        self.createNewRoomButton.setFont(self.font_)
+        self.layout.addWidget(self.createNewRoomButton, 1, 0, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.joinToRoomButton = QPushButton("Belépés chatszobába")
+        self.joinToRoomButton.setFixedSize(300, 75)
+        self.joinToRoomButton.setFont(self.font_)
+        self.layout.addWidget(self.joinToRoomButton, 2, 0, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.editProfileButton = QPushButton("Profil módosítása")
+        self.editProfileButton.setFixedSize(300, 75)
+        self.editProfileButton.setFont(self.font_)
+        self.layout.addWidget(self.editProfileButton, 3, 0, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.logOutButton = QPushButton("Kijelentkezés")
+        self.logOutButton.setFixedSize(300, 75)
+        self.logOutButton.setFont(self.font_)
+        self.layout.addWidget(self.logOutButton, 4, 0, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.setLayout(self.layout)
+        
+
+class AllRoom(QWidget):
+    def __init__(self):
+        super(AllRoom, self).__init__()
+        self.setWindowTitle("Chat App")
+        
+        self.setFixedSize(1000,700)
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        [self.layout.setColumnStretch(i, 1) for i in range(1)]
+        [self.layout.setRowStretch(i, 1) for i in range(5)]
+        
+    def update(self):
+        r = requests.get('localhost:5000/rooms/getAll')
+        self.rooms = r.json()
+        
+
+
+
+
+
 class MainWindow(QWidget):
+    
     
     def __init__(self):
         super(MainWindow, self).__init__()
@@ -203,6 +276,7 @@ class MainWindow(QWidget):
         self.loginw = LoginWindow()
         self.regw = RegWindow()
         self.mainw = MainMenu()
+        self.allroomw = AllRoom()
         self.loginw.show()
         self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
         self.regw.backButton.clicked.connect(lambda: self.openLogin(self.regw))
@@ -221,7 +295,12 @@ class MainWindow(QWidget):
         
     def openMainMenu(self, before):
         before.close()
+        self.mainw.updateAfterLogin()
         self.mainw.show()
+        
+    def openAllRoom(self, before):
+        before.close()
+        self.allroomw.show()
         
 
 

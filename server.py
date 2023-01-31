@@ -41,16 +41,16 @@ def onRoomJoinRequest(_roomCode):
     roomName = db.joinRoom(roomCode)
     emit('joinedRoom', {'nev': roomName[0]})
     
-@socketio.on('getAllRoom')
-def getAllRoom():
-    sendLista = []
-    codes = []
-    lista = db.getAllRooms()
-    for elem in lista:
-        sendLista.append(f"{elem[1]}\t\t\t{elem[3]}")
-        codes.append(elem[2])
-    print(sendLista)
-    socketio.emit('allRoom', {'list': sendLista, 'codes':codes})
+# @socketio.on('getAllRoom')
+# def getAllRoom():
+#     sendLista = []
+#     codes = []
+#     lista = db.getAllRooms()
+#     for elem in lista:
+#         sendLista.append(f"{elem[1]}\t\t\t{elem[3]}")
+#         codes.append(elem[2])
+#     print(sendLista)
+#     socketio.emit('allRoom', {'list': sendLista, 'codes':codes})
 
 
 @socketio.on('messageSent')
@@ -78,3 +78,13 @@ def login():
     if db.login(username, password):
         return {"sikeresE": True}
     return {"sikeresE": False}
+
+@app.route('/rooms/getAll', methods = ["GET"])
+def getAllRoom():
+    roomsListToReturn = []
+    rooms = db.getAllRooms()
+    for room in rooms:
+        if not room[4]:
+            roomsListToReturn.append((room[1], room[3], room[2]))
+            
+    return {"rooms": roomsListToReturn}
