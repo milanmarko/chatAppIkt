@@ -79,6 +79,11 @@ def login():
         return {"sikeresE": True}
     return {"sikeresE": False}
 
+@app.route('/account/getAccountInfo', methods = ["GET"])
+def getAccountInfo():
+    data = request.form
+    userData = db.getAccountInfo(data["username"], data["passoword"])
+
 @app.route('/rooms/getAll', methods = ["GET"])
 def getAllRoom():
     roomsListToReturn = []

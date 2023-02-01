@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdi
 from PyQt5.QtCore import Qt, pyqtSignal
 import hashlib, requests
 
-global usernameGlobal
+global usernameGlobal, passwordGlobal
 usernameGlobal = ""
+passwordGlobal = ""
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()  
     
@@ -184,6 +185,8 @@ class LoginWindow(QWidget):
     def login(self):
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
+        global passwordGlobal
+        passwordGlobal = password
         r = requests.post('http://localhost:5000/account/login', {"userName": username, "password": password})
         r = r.json()
         if r["sikeresE"]:
@@ -245,6 +248,57 @@ class MainMenu(QWidget):
         self.setLayout(self.layout)
         
 
+class EditProfile(QWidget):
+    def __init__(self):
+        super(EditProfile, self).__init__()
+        
+        self.setWindowTitle("Chat App")
+        
+        self.setFixedSize(1000,700)
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        [self.layout.setColumnStretch(i, 1) for i in range(2)]
+        [self.layout.setRowStretch(i, 1) for i in range(5)]
+
+    
+    def update(self):
+        r = requests.get('localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
+        r = r.json()
+        self.emailLabel = QLabel("Email cím:")
+        self.font_ = self.emailLabel.font()
+        self.font_.setPointSize(20)
+        self.emailLabel.setFont(self.font_)
+        self.layout.addWidget(self.emailLabel, 0, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.usernameLabel = QLabel("Felhasználónév:")
+        self.usernameLabel.setFont(self.font_)
+        self.layout.addWidget(self.usernameLabel, 1, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.oldPassword = QLabel("Régi jelszó:")
+        self.oldPassword.setFont(self.font_)
+        self.layout.addWidget(self.oldPassword, 2, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.newPasswordOne = QLabel("Új jelszó:")
+        self.newPasswordOne.setFont(self.font_)
+        self.layout.addWidget(self.newPasswordOne, 3, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        
+        self.newPasswordTwo = QLabel("Új jelszó másodszor:")
+        self.newPasswordTwo.setFont(self.font_)
+        self.layout.addWidget(self.newPasswordTwo, 4, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.newUsernameInput = QLineEdit()
+        self.newUsernameInput.setFont(self.font_)
+        self.newUsernameInput.setPlaceholderText(r["username"])
+        self.layout.addWidget(self.newUsernameInput)
+        
+        
+        self.setLayout(self.layout)
+        
+
+
 class AllRoom(QWidget):
     def __init__(self):
         super(AllRoom, self).__init__()
@@ -274,34 +328,44 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__()
         self.setFixedSize(1000, 700)
         self.loginw = LoginWindow()
-        self.regw = RegWindow()
-        self.mainw = MainMenu()
-        self.allroomw = AllRoom()
+
         self.loginw.show()
         self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
-        self.regw.backButton.clicked.connect(lambda: self.openLogin(self.regw))
-        
-        self.regw.sikeresReg.connect(lambda: self.openLogin(self.regw))
-        self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))
+        self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))        
         # self.setCentralWidget(self.loginw)
         
     def openReg(self, before):
         before.close()
+        self.regw = RegWindow()
+        self.regw.backButton.clicked.connect(lambda: self.openLogin(self.regw))
+        self.regw.sikeresReg.connect(lambda: self.openLogin(self.regw))
         self.regw.show()
         
     def openLogin(self, before):
         before.close()
+        self.loginw = LoginWindow()
+        global usernameGlobal
+        usernameGlobal = ""
         self.loginw.show()
         
     def openMainMenu(self, before):
         before.close()
+        self.mainw = MainMenu()
         self.mainw.updateAfterLogin()
+        self.mainw.logOutButton.clicked.connect(lambda: self.openLogin(self.mainw))
+        self.mainw.editProfileButton.clicked.connect(lambda: self.openEditProfile(self.mainw))
         self.mainw.show()
         
     def openAllRoom(self, before):
         before.close()
+        self.allroomw = AllRoom()
         self.allroomw.show()
         
+    def openEditProfile(self, before):
+        before.close()
+        self.editprofilew = EditProfile()
+        self.editprofilew.update()
+        self.editprofilew.show()
 
 
 app = QApplication([])
