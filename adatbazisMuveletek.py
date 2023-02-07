@@ -58,5 +58,5 @@ class Adatbazis:
     
     def getAccountInfo(self, username, password):
         with self.db.cursor() as cursor:
-            cursor.execute(f"SELECT FROM users WHERE username = '{username}' AND password = '{password}'")
+            cursor.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
             return cursor.fetchall()

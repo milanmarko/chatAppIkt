@@ -79,10 +79,12 @@ def login():
         return {"sikeresE": True}
     return {"sikeresE": False}
 
-@app.route('/account/getAccountInfo', methods = ["GET"])
+@app.route('/account/getAccountInfo', methods = ["POST"])
 def getAccountInfo():
     data = request.form
-    userData = db.getAccountInfo(data["username"], data["passoword"])
+    userData = db.getAccountInfo(data["username"], data["password"])[0]
+    print(userData)
+    return {"username": userData[1], "email": userData[0]}
 
 @app.route('/rooms/getAll', methods = ["GET"])
 def getAllRoom():

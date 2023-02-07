@@ -24,33 +24,34 @@ class RegWindow(QWidget):
         self.emailFirstLabel.setFixedSize(400, 100)
         self.emailFirstLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.emailFirstLabel.font()
-        self.font.setPointSize(15)
+        self.font.setPointSize(25)
         self.emailFirstLabel.setFont(self.font)
         self.layout.addWidget(self.emailFirstLabel, 0, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
-        self.emailSecondLabel = QLabel("Email cím újra: ")
-        self.emailSecondLabel.setFixedSize(400, 100)
-        self.emailSecondLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
-        self.font = self.emailSecondLabel.font()
-        self.font.setPointSize(15)
-        self.emailSecondLabel.setFont(self.font)
-        self.layout.addWidget(self.emailSecondLabel, 1, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
         self.usernameLabel = QLabel("Felhasználónév: ")
         self.usernameLabel.setFixedSize(400, 100)
         self.usernameLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.usernameLabel.font()
-        self.font.setPointSize(15)
+        self.font.setPointSize(25)
         self.usernameLabel.setFont(self.font)
-        self.layout.addWidget(self.usernameLabel, 2, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
+        self.layout.addWidget(self.usernameLabel, 1, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
         self.passwordLabel = QLabel("Jelszó: ")
         self.passwordLabel.setFixedSize(400, 100)
         self.passwordLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.passwordLabel.font()
-        self.font.setPointSize(15)
+        self.font.setPointSize(25)
         self.passwordLabel.setFont(self.font)
-        self.layout.addWidget(self.passwordLabel, 3, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
+        self.layout.addWidget(self.passwordLabel, 2, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
+
+        self.passwordTwoLabel = QLabel("Jelszó újra: ")
+        self.passwordTwoLabel.setFixedSize(400, 100)
+        self.passwordTwoLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
+        self.font = self.passwordTwoLabel.font()
+        self.font.setPointSize(25)
+        self.passwordTwoLabel.setFont(self.font)
+        self.layout.addWidget(self.passwordTwoLabel, 3, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
         self.backButton = QPushButton("Vissza")
         self.backButton.setFixedSize(300, 100)
@@ -69,40 +70,43 @@ class RegWindow(QWidget):
         self.emailOneInput.setFont(self.font)
         self.layout.addWidget(self.emailOneInput, 0, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
-        self.emailTwoInput = QLineEdit()
-        self.emailTwoInput.setAlignment(Qt.AlignCenter | Qt.AlignLeft)
-        self.emailTwoInput.setFixedSize(300, 50)
-        self.emailTwoInput.setFont(self.font)
-        self.layout.addWidget(self.emailTwoInput, 1, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
         self.usernameInput = QLineEdit()
         self.usernameInput.setAlignment(Qt.AlignCenter | Qt.AlignLeft)
         self.usernameInput.setFixedSize(300, 50)
         self.usernameInput.setFont(self.font)
-        self.layout.addWidget(self.usernameInput, 2, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
+        self.layout.addWidget(self.usernameInput, 1, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
         self.passwordInput = QLineEdit()
         self.passwordInput.setAlignment(Qt.AlignCenter | Qt.AlignLeft)
         self.passwordInput.setFixedSize(300, 50)
         self.passwordInput.setFont(self.font)
         self.passwordInput.setEchoMode(QLineEdit.Password)
-        self.layout.addWidget(self.passwordInput, 3, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
+        self.layout.addWidget(self.passwordInput, 2, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        self.passwordTwoInput = QLineEdit()
+        self.passwordTwoInput.setAlignment(Qt.AlignCenter | Qt.AlignLeft)
+        self.passwordTwoInput.setFixedSize(300, 50)
+        self.passwordTwoInput.setFont(self.font)
+        self.passwordTwoInput.setEchoMode(QLineEdit.Password)
+        self.layout.addWidget(self.passwordTwoInput, 3, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
         self.setLayout(self.layout)
         
     def register(self):
         msg = QMessageBox()
-        e1 = self.emailOneInput.text()
-        e2 = self.emailTwoInput.text()
-        if e1 != e2:
-            msg.setText("A 2 email cím nem ugyan az!")
+        p1 = self.passwordInput.text()
+        p2 = self.passwordTwoInput.text()
+        if p1 != p2:
+            msg.setText("A 2 jelszó nem ugyan az!")
             msg.setIcon(QMessageBox.Critical)
             msg.setWindowTitle("Felhasználó név hiba")
             msg.exec_()
             return
+        email = self.emailOneInput.text()
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
-        r = requests.post('http://localhost:5000/account/register', {"userEmail": e1, "userName": username, "password": password})
+        r = requests.post('http://localhost:5000/account/register', {"userEmail": email, "userName": username, "password": password})
         r = r.json()
         # print(r)
         if not r["sikeresE"] :
@@ -260,11 +264,11 @@ class EditProfile(QWidget):
         self.layout.setContentsMargins(50,50,50,50)
         self.layout.setHorizontalSpacing(100)
         [self.layout.setColumnStretch(i, 1) for i in range(2)]
-        [self.layout.setRowStretch(i, 1) for i in range(5)]
+        [self.layout.setRowStretch(i, 1) for i in range(6)]
 
     
     def update(self):
-        r = requests.get('localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
+        r = requests.post('http://localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
         r = r.json()
         self.emailLabel = QLabel("Email cím:")
         self.font_ = self.emailLabel.font()
@@ -289,10 +293,15 @@ class EditProfile(QWidget):
         self.newPasswordTwo.setFont(self.font_)
         self.layout.addWidget(self.newPasswordTwo, 4, 0, Qt.AlignCenter | Qt.AlignRight)
         
+        self.newEmailInput = QLineEdit()
+        self.newEmailInput.setFont(self.font_)
+        self.newEmailInput.setPlaceholderText(r["email"])
+        self.layout.addWidget(self.newEmailInput, 0, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
         self.newUsernameInput = QLineEdit()
         self.newUsernameInput.setFont(self.font_)
         self.newUsernameInput.setPlaceholderText(r["username"])
-        self.layout.addWidget(self.newUsernameInput)
+        self.layout.addWidget(self.newUsernameInput, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
         
         self.setLayout(self.layout)
@@ -362,10 +371,10 @@ class MainWindow(QWidget):
         self.allroomw.show()
         
     def openEditProfile(self, before):
-        before.close()
         self.editprofilew = EditProfile()
-        self.editprofilew.update()
         self.editprofilew.show()
+        self.editprofilew.update()
+        before.close()
 
 
 app = QApplication([])
