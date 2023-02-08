@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from adatbazisMuveletek import Adatbazis
 import random, string
@@ -95,3 +95,7 @@ def getAllRoom():
             roomsListToReturn.append((room[1], room[3], room[2]))
             
     return {"rooms": roomsListToReturn}
+
+@app.route('/index', methods= ["GET"])
+def index():
+    return render_template('index.html')
