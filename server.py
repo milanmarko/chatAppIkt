@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from adatbazisMuveletek import Adatbazis
-import random, string
+import random, string, datetime
 
 
 app = Flask(__name__)
@@ -72,10 +72,12 @@ def register():
     
 @app.route('/account/login', methods = ["POST"])
 def login():
+    print(f"Login megkezdése: {datetime.datetime.now()}")
     loginData = request.form
     username = loginData['userName']
     password = loginData['password']
     loginTp = db.login(username, password)
+    print(f"Login kész: {datetime.datetime.now()}")
     if loginTp[0]:
         return {"sikeresE": True, "data": loginTp[1]}
     return {"sikeresE": False}
@@ -92,9 +94,9 @@ def getAllRoom():
     roomsListToReturn = []
     rooms = db.getAllRooms()
     for room in rooms:
-        if not room[4]:
-            roomsListToReturn.append((room[1], room[3], room[2]))
-            
+        # if not room[4]:
+        roomsListToReturn.append((room[1], room[3], room[2]))
+    
     return {"rooms": roomsListToReturn}
 
 @app.route('/index', methods= ["GET"])

@@ -1,6 +1,6 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests
+import hashlib, requests, datetime
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
@@ -187,12 +187,16 @@ class LoginWindow(QWidget):
         self.setLayout(self.layout)
     
     def login(self):
+        print(f"Login elkezédése: {datetime.datetime.now()}")
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
         global passwordGlobal
         passwordGlobal = password
+        print(f"Login Api request küldve: {datetime.datetime.now()}")
         r = requests.post('http://localhost:5000/account/login', {"userName": username, "password": password})
         r = r.json()
+        print(f"Login Api request megkapva: {datetime.datetime.now()}")
+        
         if r["sikeresE"]:
             print("nyom")
             global usernameGlobal
@@ -206,6 +210,8 @@ class LoginWindow(QWidget):
             msg.setIcon(QMessageBox.Critical)
             msg.setWindowTitle("Sikertelen bejelentkezés")
             msg.exec_()
+        print(f"Login kész: {datetime.datetime.now()}")
+        
             
 
 class MainMenu(QWidget):
@@ -432,12 +438,27 @@ class AllRoom(QWidget):
         self.layout.setContentsMargins(50,50,50,50)
         self.layout.setHorizontalSpacing(100)
         [self.layout.setColumnStretch(i, 1) for i in range(1)]
-        [self.layout.setRowStretch(i, 1) for i in range(5)]
+        [self.layout.setRowStretch(i, 1) for i in range(1)]
         
     def update(self):
-        r = requests.get('localhost:5000/rooms/getAll')
-        self.rooms = r.json()
+        r = requests.get('http://localhost:5000/rooms/getAll')
+        self.rooms = r.json()["rooms"]
         
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(len(self.rooms))
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidget.setHorizontalHeaderLabels(['Szoba neve', 'Résztvevők száma', 'Csatlakozás'])
+        self.tableWidget.setVerticalHeaderLabels([])
+        
+        for index, row in enumerate(self.rooms):
+            self.tableWidget.setItem(index, 0, QTableWidgetItem(row[0]))
+            self.tableWidget.setItem(index, 1, QTableWidgetItem(str(row[1])))
+            
+        
+        self.layout.addWidget(self.tableWidget, 0, 0)
+        self.setLayout(self.layout)
 
 
 
@@ -478,15 +499,13 @@ class MainWindow(QWidget):
         self.mainw.updateAfterLogin()
         self.mainw.logOutButton.clicked.connect(lambda: self.openLogin(self.mainw))
         self.mainw.editProfileButton.clicked.connect(lambda: self.openEditProfile(self.mainw))
+        self.mainw.joinToRoomButton.clicked.connect(lambda: self.openAllRoom(self.mainw))
         self.mainw.show()
-        # r = requests.post('http://localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
-        # r = r.json()
-        # # Szerver átírása hogy küldjön vissza mindent loginkor
-        # self.profileDatas = r
         
     def openAllRoom(self, before):
         before.close()
         self.allroomw = AllRoom()
+        self.allroomw.update()
         self.allroomw.show()
         
     def openEditProfile(self, before):
