@@ -75,8 +75,9 @@ def login():
     loginData = request.form
     username = loginData['userName']
     password = loginData['password']
-    if db.login(username, password):
-        return {"sikeresE": True}
+    loginTp = db.login(username, password)
+    if loginTp[0]:
+        return {"sikeresE": True, "data": loginTp[1]}
     return {"sikeresE": False}
 
 @app.route('/account/getAccountInfo', methods = ["POST"])
@@ -84,7 +85,7 @@ def getAccountInfo():
     data = request.form
     userData = db.getAccountInfo(data["username"], data["password"])[0]
     print(userData)
-    return {"username": userData[1], "email": userData[0]}
+    return {"username": userData[2], "email": userData[1]}
 
 @app.route('/rooms/getAll', methods = ["GET"])
 def getAllRoom():
@@ -99,3 +100,13 @@ def getAllRoom():
 @app.route('/index', methods= ["GET"])
 def index():
     return render_template('index.html')
+
+@app.route('/account/editAccountInfo', methods = ["POST"])
+def editAccountInfo():
+    data = request.form
+    if db.isUsernameFree(data["newUsername"], data["isUsernameBeingChanged"]):
+        db.editAccountInfo(data["newEmail"], data['newUsername'], data["oldUsername"], data["oldPassword"], data["newPassword"])
+        return {"sikeresE": True, "data": {"email": data['newEmail'], "username": data["newUsername"], "password": data['newPassword']}}
+    return {"sikeresE": False, "isUsernameUsed": True}
+    # try:
+    #     password
