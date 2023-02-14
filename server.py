@@ -112,3 +112,11 @@ def editAccountInfo():
     return {"sikeresE": False, "isUsernameUsed": True}
     # try:
     #     password
+    
+@app.route('/login', methods= ["GET"])
+def loginHtml():
+    return render_template('login.html')
+
+@app.route('/registration', methods= ["GET"])
+def registrationHtml():
+    return render_template('register.html')
