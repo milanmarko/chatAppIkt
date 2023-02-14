@@ -1,11 +1,17 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests, datetime
+import hashlib, requests, datetime, socketio
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
 passwordGlobal = ""
 emailGlobal = ""
+roomCode = ""
+roomName = ""
+
+sio = socketio.Client()
+sio.connect('http://127.0.0.1:5000')
+
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()  
     
@@ -428,6 +434,8 @@ class EditProfile(QWidget):
                 
 
 class AllRoom(QWidget):
+    joiningToRoom = pyqtSignal()
+    
     def __init__(self):
         super(AllRoom, self).__init__()
         self.setWindowTitle("Chat App")
@@ -455,13 +463,62 @@ class AllRoom(QWidget):
         for index, row in enumerate(self.rooms):
             self.tableWidget.setItem(index, 0, QTableWidgetItem(row[0]))
             self.tableWidget.setItem(index, 1, QTableWidgetItem(str(row[1])))
+            self.tableWidget.setCellWidget(index, 2, QPushButton("Csatlakozás"))
+            self.tableWidget.cellWidget(index, 2).clicked.connect(lambda: self.connectToRoom(row[0], row[2]))    
             
+        self.tableWidget.setEditTriggers(QTableWidget.NoEditTriggers)
         
         self.layout.addWidget(self.tableWidget, 0, 0)
         self.setLayout(self.layout)
 
-
-
+    def connectToRoom(self, roomName_, roomCode_):
+        global roomName
+        roomName = roomName_
+        global roomCode
+        roomCode = roomCode_
+        self.joiningToRoom.emit()
+        
+        
+class ChatRoomWindow(QWidget):
+    
+    def __init__(self):
+        super(ChatRoomWindow, self).__init__()
+        self.setWindowTitle("Chat App")
+        
+        self.setFixedSize(1000,700)
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        # [self.layout.setColumnStretch(i, 2) for i in range(1)]
+        self.layout.setColumnStretch(0, 3)
+        self.layout.setColumnStretch(1, 1)
+        # [self.layout.setRowStretch(i, 2) for i in range(1)]
+        self.layout.setRowStretch(0, 1)
+        self.layout.setRowStretch(1, 3)
+        self.layout.setRowStretch(2, 1)
+        
+        self.title = QLabel(f"Chatszoba: {roomName}")
+        self.font_ = self.title.font()
+        self.font_.setPointSize(20)
+        self.title.setFont(self.font_)
+        self.layout.addWidget(self.title, 0, 1, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.chatView = QScrollArea()
+        self.layout.addWidget(self.chatView, 1, 0, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.chatInput = QLineEdit()
+        self.layout.addWidget(self.chatInput, 2, 0, 1, 1, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.chatButton = QPushButton("Küldés")
+        self.layout.addWidget(self.chatButton, 2, 1, 1, 1, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        # self.asd = QLabel("LAS")
+        # self.layout.addWidget(self.asd, 0, 0)
+        
+        self.setLayout(self.layout)
+        
+        
 
 
 class MainWindow(QWidget):
@@ -471,7 +528,6 @@ class MainWindow(QWidget):
         super(MainWindow, self).__init__()
         self.setFixedSize(1000, 700)
         self.loginw = LoginWindow()
-
         self.loginw.show()
         self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
         self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))        
@@ -503,10 +559,11 @@ class MainWindow(QWidget):
         self.mainw.show()
         
     def openAllRoom(self, before):
-        before.close()
         self.allroomw = AllRoom()
         self.allroomw.update()
+        self.allroomw.joiningToRoom.connect(self.joiningRoom)
         self.allroomw.show()
+        before.close()
         
     def openEditProfile(self, before):
         self.editprofilew = EditProfile()
@@ -515,8 +572,20 @@ class MainWindow(QWidget):
         self.editprofilew.backButton.clicked.connect(lambda: self.openMainMenu(self.editprofilew))
         self.editprofilew.accountInfoChangeSuccesfull.connect(lambda: self.openMainMenu(self.editprofilew))
         before.close()
-
-
+        
+    def joiningRoom(self):
+        sio.emit('joinRoom', {"roomID": roomCode})
+        sio.on('joinedRoom')
+        self.openChatRoom(self.allroomw)
+        # self.chatroomw = ChatRoomWindow()
+        # self.chatroomw.show()
+        
+    def openChatRoom(self, before):
+        before.close()
+        self.chatroomw = ChatRoomWindow()
+        self.chatroomw.show()
+        
+    
 app = QApplication([])
 # w = MainWindow()
 w = MainWindow()
