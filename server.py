@@ -1,7 +1,7 @@
 from flask import Flask, request, render_template
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from adatbazisMuveletek import Adatbazis
-import random, string
+import random, string, datetime
 
 
 app = Flask(__name__)
@@ -72,11 +72,14 @@ def register():
     
 @app.route('/account/login', methods = ["POST"])
 def login():
+    print(f"Login megkezdése: {datetime.datetime.now()}")
     loginData = request.form
     username = loginData['userName']
     password = loginData['password']
-    if db.login(username, password):
-        return {"sikeresE": True}
+    loginTp = db.login(username, password)
+    print(f"Login kész: {datetime.datetime.now()}")
+    if loginTp[0]:
+        return {"sikeresE": True, "data": loginTp[1]}
     return {"sikeresE": False}
 
 @app.route('/account/getAccountInfo', methods = ["POST"])
@@ -84,18 +87,28 @@ def getAccountInfo():
     data = request.form
     userData = db.getAccountInfo(data["username"], data["password"])[0]
     print(userData)
-    return {"username": userData[1], "email": userData[0]}
+    return {"username": userData[2], "email": userData[1]}
 
 @app.route('/rooms/getAll', methods = ["GET"])
 def getAllRoom():
     roomsListToReturn = []
     rooms = db.getAllRooms()
     for room in rooms:
-        if not room[4]:
-            roomsListToReturn.append((room[1], room[3], room[2]))
-            
+        # if not room[4]:
+        roomsListToReturn.append((room[1], room[3], room[2]))
+    
     return {"rooms": roomsListToReturn}
 
 @app.route('/index', methods= ["GET"])
 def index():
     return render_template('index.html')
+
+@app.route('/account/editAccountInfo', methods = ["POST"])
+def editAccountInfo():
+    data = request.form
+    if db.isUsernameFree(data["newUsername"], data["isUsernameBeingChanged"]):
+        db.editAccountInfo(data["newEmail"], data['newUsername'], data["oldUsername"], data["oldPassword"], data["newPassword"])
+        return {"sikeresE": True, "data": {"email": data['newEmail'], "username": data["newUsername"], "password": data['newPassword']}}
+    return {"sikeresE": False, "isUsernameUsed": True}
+    # try:
+    #     password

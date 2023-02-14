@@ -1,4 +1,4 @@
-import mysql.connector
+import mysql.connector, datetime
 
 class Adatbazis:
     
@@ -37,10 +37,12 @@ class Adatbazis:
             cursor.execute(f"DELETE FROM szobak WHERE szobaResztvevok = 0")
             self.db.commit()
     
-    def isUsernameFree(self, username):
-        with self.db.cursor() as cursor:
+    def isUsernameFree(self, username, mode):
+        if username == "":
+            return True
+        with self.db.cursor(buffered=True) as cursor:
             cursor.execute(f"SELECT * FROM users WHERE username = '{username}'")
-            if len(cursor.fetchall()) == 0:
+            if len(cursor.fetchall()) == 0 if not mode else 1:
                 return True
             return False
     
@@ -52,11 +54,22 @@ class Adatbazis:
     def login(self, username, password):
         with self.db.cursor() as cursor:
             cursor.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
-            if len(cursor.fetchall()) == 1:
-                return True
-            return False
+            r = cursor.fetchall()
+            if len(r) == 1:
+                return (True, r[0])
+            return (False,)
     
     def getAccountInfo(self, username, password):
         with self.db.cursor() as cursor:
             cursor.execute(f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'")
             return cursor.fetchall()
+        
+    def editAccountInfo(self, newEmail, newUsername, oldUsername, oldPassword, newPassword = ""):
+        with self.db.cursor() as cursor:
+            if newPassword != "":
+                print(newPassword + 'ÁaSD')
+                cursor.execute(f"UPDATE users SET email = '{newEmail}', username = '{newUsername}', password = '{newPassword}' WHERE (password = '{oldPassword}' AND username = '{oldUsername}')")
+                self.db.commit()
+            else:
+                cursor.execute(f"UPDATE users SET email = '{newEmail}', username = '{newUsername}' WHERE (password = '{oldPassword}' AND username = '{oldUsername}')")
+                self.db.commit()

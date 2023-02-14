@@ -1,10 +1,11 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests
+import hashlib, requests, datetime
 
-global usernameGlobal, passwordGlobal
+# global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
 passwordGlobal = ""
+emailGlobal = ""
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()  
     
@@ -108,7 +109,6 @@ class RegWindow(QWidget):
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
         r = requests.post('http://localhost:5000/account/register', {"userEmail": email, "userName": username, "password": password})
         r = r.json()
-        # print(r)
         if not r["sikeresE"] :
             if r["isUsernameUsed"]:
                 msg.setWindowTitle("Használt felhasználónév!")
@@ -187,15 +187,22 @@ class LoginWindow(QWidget):
         self.setLayout(self.layout)
     
     def login(self):
+        print(f"Login elkezédése: {datetime.datetime.now()}")
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
         global passwordGlobal
         passwordGlobal = password
+        print(f"Login Api request küldve: {datetime.datetime.now()}")
         r = requests.post('http://localhost:5000/account/login', {"userName": username, "password": password})
         r = r.json()
+        print(f"Login Api request megkapva: {datetime.datetime.now()}")
+        
         if r["sikeresE"]:
+            print("nyom")
             global usernameGlobal
             usernameGlobal = username
+            global emailGlobal
+            emailGlobal = r["data"][1]
             self.sikeresLogin.emit()
         else:
             msg = QMessageBox()
@@ -203,6 +210,8 @@ class LoginWindow(QWidget):
             msg.setIcon(QMessageBox.Critical)
             msg.setWindowTitle("Sikertelen bejelentkezés")
             msg.exec_()
+        print(f"Login kész: {datetime.datetime.now()}")
+        
             
 
 class MainMenu(QWidget):
@@ -223,6 +232,7 @@ class MainMenu(QWidget):
         
         
     def updateAfterLogin(self):
+        global usernameGlobal
         self.usernameLabel = QLabel(f"Bejelentkezve mint: {usernameGlobal}")
         self.font_ = self.usernameLabel.font()
         self.font_.setPointSize(20)
@@ -253,8 +263,14 @@ class MainMenu(QWidget):
         
 
 class EditProfile(QWidget):
+    
+    accountInfoChangeSuccesfull = pyqtSignal()
+    
     def __init__(self):
         super(EditProfile, self).__init__()
+        
+        
+        self.isPasswordBeingEdited = False
         
         self.setWindowTitle("Chat App")
         
@@ -268,8 +284,8 @@ class EditProfile(QWidget):
 
     
     def update(self):
-        r = requests.post('http://localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
-        r = r.json()
+        # r = requests.post('http://localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
+        # r = r.json()
         self.emailLabel = QLabel("Email cím:")
         self.font_ = self.emailLabel.font()
         self.font_.setPointSize(20)
@@ -284,29 +300,132 @@ class EditProfile(QWidget):
         self.oldPassword.setFont(self.font_)
         self.layout.addWidget(self.oldPassword, 2, 0, Qt.AlignCenter | Qt.AlignRight)
         
-        self.newPasswordOne = QLabel("Új jelszó:")
-        self.newPasswordOne.setFont(self.font_)
-        self.layout.addWidget(self.newPasswordOne, 3, 0, Qt.AlignCenter | Qt.AlignRight)
-        
-        
-        self.newPasswordTwo = QLabel("Új jelszó másodszor:")
-        self.newPasswordTwo.setFont(self.font_)
-        self.layout.addWidget(self.newPasswordTwo, 4, 0, Qt.AlignCenter | Qt.AlignRight)
-        
         self.newEmailInput = QLineEdit()
         self.newEmailInput.setFont(self.font_)
-        self.newEmailInput.setPlaceholderText(r["email"])
+        global emailGlobal
+        self.newEmailInput.setPlaceholderText(emailGlobal)
         self.layout.addWidget(self.newEmailInput, 0, 1, Qt.AlignCenter | Qt.AlignLeft)
         
         self.newUsernameInput = QLineEdit()
         self.newUsernameInput.setFont(self.font_)
-        self.newUsernameInput.setPlaceholderText(r["username"])
+        global usernameGlobal
+        self.newUsernameInput.setPlaceholderText(usernameGlobal)
         self.layout.addWidget(self.newUsernameInput, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
         
+        self.oldPasswordInput = QLineEdit()
+        self.oldPasswordInput.setFont(self.font_)
+        self.oldPasswordInput.setEchoMode(QLineEdit.Password)
+        self.oldPasswordInput.textEdited.connect(self.editPassword)
+        self.layout.addWidget(self.oldPasswordInput, 2, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        self.changeButton = QPushButton("Változtatás")
+        self.changeButton.setFixedSize(300, 100)
+        self.changeButton.setFont(self.font_)
+        self.layout.addWidget(self.changeButton, 5, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        self.changeButton.clicked.connect(self.changeAccountInfo)
+
+        self.backButton = QPushButton("Vissza")
+        self.backButton.setFixedSize(300, 100)
+        self.backButton.setFont(self.font_)
+        self.layout.addWidget(self.backButton, 5, 0, Qt.AlignCenter | Qt.AlignRight)
         
         self.setLayout(self.layout)
         
+    def editPassword(self):
+        
+        if not self.isPasswordBeingEdited:
+            
+            self.newPasswordOneLabel = QLabel("Új jelszó:")
+            self.newPasswordOneLabel.setFont(self.font_)
+            self.layout.addWidget(self.newPasswordOneLabel, 3, 0, Qt.AlignCenter | Qt.AlignRight)
 
+            self.newPasswordTwoLabel = QLabel("Új jelszó másodszor:")
+            self.newPasswordTwoLabel.setFont(self.font_)
+            self.layout.addWidget(self.newPasswordTwoLabel, 4, 0, Qt.AlignCenter | Qt.AlignRight)
+            
+            self.newPasswordOneInput = QLineEdit()
+            self.newPasswordOneInput.setFont(self.font_)
+            self.newPasswordOneInput.setEchoMode(QLineEdit.Password)
+            self.newPasswordOneInput.textEdited.connect(self.editPassword)
+            self.layout.addWidget(self.newPasswordOneInput, 3, 1, Qt.AlignCenter | Qt.AlignLeft)
+            
+            self.newPasswordTwoInput = QLineEdit()
+            self.newPasswordTwoInput.setFont(self.font_)
+            self.newPasswordTwoInput.setEchoMode(QLineEdit.Password)
+            self.newPasswordTwoInput.textEdited.connect(self.editPassword)
+            self.layout.addWidget(self.newPasswordTwoInput, 4, 1, Qt.AlignCenter | Qt.AlignLeft)
+            
+            self.setLayout(self.layout)
+            self.isPasswordBeingEdited = True
+
+
+        if self.oldPasswordInput.text() == "":
+            
+            self.newPasswordOneLabel.hide()
+            self.newPasswordTwoLabel.hide()
+            self.newPasswordOneInput.hide()
+            self.newPasswordTwoInput.hide()
+                       
+            self.newPasswordOneLabel = None
+            self.newPasswordTwoLabel = None
+            self.newPasswordOneInput = None
+            self.newPasswordTwoInput = None
+            self.isPasswordBeingEdited = False
+            
+    def changeAccountInfo(self):
+        isUsernameBeingChanged = True
+        global usernameGlobal
+        newEmail = self.newEmailInput.text()
+        if newEmail == "":
+            global emailGlobal
+            newEmail = emailGlobal
+        newUsername = self.newUsernameInput.text()
+        if newUsername == "":
+            global usernameGlobal
+            print(newUsername )
+            newUsername = usernameGlobal
+            isUsernameBeingChanged = False
+        if self.isPasswordBeingEdited:
+            oldPassword = hashlib.md5(self.oldPasswordInput.text().encode('utf-8')).hexdigest()
+            newPasswordOne = hashlib.md5(self.newPasswordOneInput.text().encode('utf-8')).hexdigest()
+            newPasswordTwo = hashlib.md5(self.newPasswordTwoInput.text().encode('utf-8')).hexdigest()
+            if newPasswordOne != newPasswordTwo:
+                msg = QMessageBox()
+                msg.setText("A 2 jelszó nem ugyan az!")
+                msg.setIcon(QMessageBox.Critical)
+                msg.setWindowTitle("Sikertelen jelszóváltoztatás")
+                msg.exec_()
+                return
+            r = requests.post('http://localhost:5000/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": oldPassword, "newPassword": newPasswordOne, "isUsernameBeingChanged": isUsernameBeingChanged})
+        else:
+            r = requests.post('http://localhost:5000/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": passwordGlobal, "newPassword": "", "isUsernameBeingChanged": isUsernameBeingChanged})
+        r = r.json()
+        
+        if r["sikeresE"]:
+            msg = QMessageBox()
+            msg.setText("Sikeres változtatás!")
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle("Sikeres változtatás")
+            msg.exec_()
+            # global emailGlobal
+            # global usernameGlobal
+            # global passwordGlobal
+            emailGlobal = r["data"]["email"]
+            usernameGlobal = r["data"]["username"]
+            passwordGlobal = r["data"]["password"]
+            self.accountInfoChangeSuccesfull.emit()
+            
+        elif r["isUsernameUsed"]:
+            msg = QMessageBox()
+            msg.setText("Használt felhasználónév!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Sikertelen felhasználónév változtatás")
+            msg.exec_()
+            
+
+            
+                
 
 class AllRoom(QWidget):
     def __init__(self):
@@ -319,12 +438,27 @@ class AllRoom(QWidget):
         self.layout.setContentsMargins(50,50,50,50)
         self.layout.setHorizontalSpacing(100)
         [self.layout.setColumnStretch(i, 1) for i in range(1)]
-        [self.layout.setRowStretch(i, 1) for i in range(5)]
+        [self.layout.setRowStretch(i, 1) for i in range(1)]
         
     def update(self):
-        r = requests.get('localhost:5000/rooms/getAll')
-        self.rooms = r.json()
+        r = requests.get('http://localhost:5000/rooms/getAll')
+        self.rooms = r.json()["rooms"]
         
+        self.tableWidget = QTableWidget()
+        self.tableWidget.setRowCount(len(self.rooms))
+        self.tableWidget.setColumnCount(3)
+        self.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.tableWidget.setHorizontalHeaderLabels(['Szoba neve', 'Résztvevők száma', 'Csatlakozás'])
+        self.tableWidget.setVerticalHeaderLabels([])
+        
+        for index, row in enumerate(self.rooms):
+            self.tableWidget.setItem(index, 0, QTableWidgetItem(row[0]))
+            self.tableWidget.setItem(index, 1, QTableWidgetItem(str(row[1])))
+            
+        
+        self.layout.addWidget(self.tableWidget, 0, 0)
+        self.setLayout(self.layout)
 
 
 
@@ -353,7 +487,9 @@ class MainWindow(QWidget):
     def openLogin(self, before):
         before.close()
         self.loginw = LoginWindow()
-        global usernameGlobal
+        self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
+        self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))  
+        global usernameGlobal      
         usernameGlobal = ""
         self.loginw.show()
         
@@ -363,17 +499,21 @@ class MainWindow(QWidget):
         self.mainw.updateAfterLogin()
         self.mainw.logOutButton.clicked.connect(lambda: self.openLogin(self.mainw))
         self.mainw.editProfileButton.clicked.connect(lambda: self.openEditProfile(self.mainw))
+        self.mainw.joinToRoomButton.clicked.connect(lambda: self.openAllRoom(self.mainw))
         self.mainw.show()
         
     def openAllRoom(self, before):
         before.close()
         self.allroomw = AllRoom()
+        self.allroomw.update()
         self.allroomw.show()
         
     def openEditProfile(self, before):
         self.editprofilew = EditProfile()
         self.editprofilew.show()
         self.editprofilew.update()
+        self.editprofilew.backButton.clicked.connect(lambda: self.openMainMenu(self.editprofilew))
+        self.editprofilew.accountInfoChangeSuccesfull.connect(lambda: self.openMainMenu(self.editprofilew))
         before.close()
 
 
