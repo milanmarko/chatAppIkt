@@ -1,0 +1,74 @@
+html, body{
+	height: 100%;
+}
+body{
+	display: flex;
+	align-items: center;
+	background-image: linear-gradient( to right, #f12711, #f5af19);
+}
+a{
+	color: #842029;
+	text-decoration: none;
+}
+a:hover{
+	color: #5a1118;
+}
+.uf-form-signin {
+    width: 100%;
+    max-width: 350px;
+    padding: 15px;
+    margin: auto;
+}
+.uf-input-group .input-group-text {
+    background: #ffffff70;
+    color: #f8f9fa;
+    border: unset;
+    font-size: 18px;
+    padding: 15px;
+    width: 50px;
+}
+
+.uf-input-group .form-control {
+    border: unset;
+    border-left: 1px solid #ffffff05;
+    font-size: 16px;
+    background: #ffffff70;
+}
+
+.uf-input-group .form-control:focus {
+    box-shadow: unset;
+    background: #ffffff;
+}
+.uf-btn-primary {
+    background: #842029;
+    color: #fff;
+}
+
+.uf-btn-primary:hover {
+    background: #5a1118;
+    color: #fff;
+}
+
+.uf-form-check-input:checked {
+    background-color: #842029;
+    border-color: #842029;
+}
+
+.uf-social-login .uf-social-ic+.uf-social-ic{
+	margin-left: 15px;
+}
+.uf-social-ic{
+	width: 40px;
+	height: 40px;
+	background: #fff;
+	border-radius: 50%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.uf-social-ic:hover{
+	background: #842029;
+}
+.uf-social-ic:hover i{
+	color: #fff;
+}
