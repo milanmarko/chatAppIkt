@@ -73,3 +73,10 @@ class Adatbazis:
             else:
                 cursor.execute(f"UPDATE users SET email = '{newEmail}', username = '{newUsername}' WHERE (password = '{oldPassword}' AND username = '{oldUsername}')")
                 self.db.commit()
+        
+    def isChatRoomNameFree(self, chatRoomName):
+        with self.db.cursor() as cursor:
+            cursor.execute(f"SELECT * FROM szobak WHERE szobaNev = '{chatRoomName}'")
+            if len(cursor.fetchall()) == 0:
+                return True
+            return False

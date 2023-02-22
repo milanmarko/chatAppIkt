@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea
+from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea, QCheckBox
 from PyQt5.QtCore import Qt, pyqtSignal
 import hashlib, requests, datetime, socketio
 
@@ -13,7 +13,7 @@ sio = socketio.Client()
 sio.connect('http://127.0.0.1:5000')
 
 class RegWindow(QWidget):
-    sikeresReg = pyqtSignal()  
+    sikeresReg = pyqtSignal()
     
     def __init__(self):
         super(RegWindow, self).__init__()
@@ -518,8 +518,80 @@ class ChatRoomWindow(QWidget):
         
         self.setLayout(self.layout)
         
+class CreateRoomWindow(QWidget):
+    roomCreated = pyqtSignal()
+    
+    def __init__(self):
+        super(CreateRoomWindow, self).__init__()
+        self.setWindowTitle("Chat App")
+        
+        self.setFixedSize(1000,700)
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        [self.layout.setColumnStretch(i, 1) for i in range(2)]
+        [self.layout.setRowStretch(i, 1) for i in range(4)]
+        
+        self.createChatRoomLabel = QLabel("Chatszoba létrehozása")
+        self.font_ = self.createChatRoomLabel.font()
+        self.font_.setPointSize(25)
+        self.createChatRoomLabel.setFont(self.font_)
+        self.layout.addWidget(self.createChatRoomLabel, 0, 0, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.chatRoomNameLabel = QLabel("Chatszoba neve:")
+        self.font_.setPointSize(20)
+        self.chatRoomNameLabel.setFont(self.font_)
+        self.layout.addWidget(self.chatRoomNameLabel, 1, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.chatRoomVisibilityLabel = QLabel("Privát-e:")
+        self.chatRoomVisibilityLabel.setFont(self.font_)
+        self.layout.addWidget(self.chatRoomVisibilityLabel, 2, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.createRoomButton = QPushButton("Létrehozás")
+        self.createRoomButton.setFixedSize(200, 67)
+        self.createRoomButton.setFont(self.font_)
+        self.createRoomButton.clicked.connect(self.createRoom)
+        self.layout.addWidget(self.createRoomButton, 3, 1, Qt.AlignCenter | Qt.AlignLeft)
         
 
+        self.backButton = QPushButton("Vissza")
+        self.backButton.setFixedSize(200, 67)
+        self.backButton.setFont(self.font_)
+        self.layout.addWidget(self.backButton, 3, 0, Qt.AlignCenter | Qt.AlignRight)
+        
+        
+        self.chatRoomNameInput = QLineEdit()
+        self.chatRoomNameInput.setFont(self.font_)
+        self.layout.addWidget(self.chatRoomNameInput, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        self.privateCheckBox = QCheckBox()
+        self.privateCheckBox.setStyleSheet("QCheckBox { font-size: 50px; }")
+        self.layout.addWidget(self.privateCheckBox, 2, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        
+        self.setLayout(self.layout)
+        
+    def createRoom(self):
+        name = self.chatRoomNameInput.text()
+        private = self.privateCheckBox.isChecked()
+        r = requests.post('http://localhost:5000/rooms/createRoom', {"roomName":name, "private": private})
+        r = r.json()
+        if r["successful"]:
+            global roomCode
+            roomCode = r["roomCode"]
+            self.roomCreated.emit()
+            msg = QMessageBox()
+            msg.setText("Sikeresen létrehozva!")
+            msg.setIcon(QMessageBox.Information)
+            msg.setWindowTitle("Szoba sikeresen létrehozva")
+            msg.exec_()
+        elif r["nameError"]:
+            msg = QMessageBox()
+            msg.setText("Már van ilyen nevű szoba!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Szoba név hiba")
+            msg.exec_()
 
 class MainWindow(QWidget):
     
@@ -556,6 +628,7 @@ class MainWindow(QWidget):
         self.mainw.logOutButton.clicked.connect(lambda: self.openLogin(self.mainw))
         self.mainw.editProfileButton.clicked.connect(lambda: self.openEditProfile(self.mainw))
         self.mainw.joinToRoomButton.clicked.connect(lambda: self.openAllRoom(self.mainw))
+        self.mainw.createNewRoomButton.clicked.connect(lambda: self.openCreateChatRoom(self.mainw))
         self.mainw.show()
         
     def openAllRoom(self, before):
@@ -576,7 +649,14 @@ class MainWindow(QWidget):
     def joiningRoom(self):
         sio.emit('joinRoom', {"roomID": roomCode})
         sio.on('joinedRoom')
-        self.openChatRoom(self.allroomw)
+        try:
+            self.openChatRoom(self.createchatroomw)
+        except:
+            pass
+        try:
+            self.openChatRoom(self.allroomw)
+        except:
+            pass
         # self.chatroomw = ChatRoomWindow()
         # self.chatroomw.show()
         
@@ -584,6 +664,12 @@ class MainWindow(QWidget):
         before.close()
         self.chatroomw = ChatRoomWindow()
         self.chatroomw.show()
+        
+    def openCreateChatRoom(self, before):
+        before.close()
+        self.createchatroomw = CreateRoomWindow()
+        self.createchatroomw.roomCreated.connect(self.joiningRoom)
+        self.createchatroomw.show()
         
     
 app = QApplication([])
