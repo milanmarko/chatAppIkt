@@ -28,11 +28,7 @@ def on_connect():
     print("connect")
     emit('connectedSuccesfully')
     
-@socketio.on('requestRoom')
-def roomRequested(chatSzobaRequest):
-    roomCode = randomString(16)
-    db.createNewRoom(chatSzobaRequest['nev'], roomCode, chatSzobaRequest['privatE'])
-    emit('roomCreated', {'roomID': roomCode})
+
     
 @socketio.on('joinRoom')
 def onRoomJoinRequest(_roomCode):
@@ -120,3 +116,12 @@ def loginHtml():
 @app.route('/registration', methods= ["GET"])
 def registrationHtml():
     return render_template('register.html')
+
+@app.route('/rooms/createRoom', methods = ["POST"])
+def createRoom():
+    incomingRequest = request.form
+    roomCode = randomString(16)
+    if db.isChatRoomNameFree(incomingRequest["roomName"]):
+        db.createNewRoom(incomingRequest['roomName'], roomCode, incomingRequest['private'])
+        return {"successful": True, "roomCode": roomCode, "nameError": False}
+    return {"successful": False, "roomCode": "", "nameError": True}
