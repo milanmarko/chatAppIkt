@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QWidget, QMainWindow, QLineEdit, QGridLayout, QPushButton, QMessageBox, QTableWidget, QTableWidgetItem, QHeaderView, QScrollArea, QCheckBox
+from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests, datetime, socketio
+import hashlib, requests, datetime, socketio, functools
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
@@ -8,6 +9,8 @@ passwordGlobal = ""
 emailGlobal = ""
 roomCode = ""
 roomName = ""
+messageHistory:QGridLayout
+messageHistoryCounter = 0
 
 sio = socketio.Client()
 sio.connect('http://127.0.0.1:5000')
@@ -31,7 +34,7 @@ class RegWindow(QWidget):
         self.emailFirstLabel.setFixedSize(400, 100)
         self.emailFirstLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.emailFirstLabel.font()
-        self.font.setPointSize(25)
+        self.font.setPointSize(20)
         self.emailFirstLabel.setFont(self.font)
         self.layout.addWidget(self.emailFirstLabel, 0, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
@@ -40,7 +43,7 @@ class RegWindow(QWidget):
         self.usernameLabel.setFixedSize(400, 100)
         self.usernameLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.usernameLabel.font()
-        self.font.setPointSize(25)
+        self.font.setPointSize(20)
         self.usernameLabel.setFont(self.font)
         self.layout.addWidget(self.usernameLabel, 1, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
@@ -48,7 +51,7 @@ class RegWindow(QWidget):
         self.passwordLabel.setFixedSize(400, 100)
         self.passwordLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.passwordLabel.font()
-        self.font.setPointSize(25)
+        self.font.setPointSize(20)
         self.passwordLabel.setFont(self.font)
         self.layout.addWidget(self.passwordLabel, 2, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
 
@@ -56,7 +59,7 @@ class RegWindow(QWidget):
         self.passwordTwoLabel.setFixedSize(400, 100)
         self.passwordTwoLabel.setAlignment(Qt.AlignCenter | Qt.AlignRight)
         self.font = self.passwordTwoLabel.font()
-        self.font.setPointSize(25)
+        self.font.setPointSize(20)
         self.passwordTwoLabel.setFont(self.font)
         self.layout.addWidget(self.passwordTwoLabel, 3, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
         
@@ -499,24 +502,68 @@ class ChatRoomWindow(QWidget):
         self.layout.setRowStretch(2, 1)
         
         self.title = QLabel(f"Chatszoba: {roomName}")
-        self.font_ = self.title.font()
-        self.font_.setPointSize(20)
-        self.title.setFont(self.font_)
-        self.layout.addWidget(self.title, 0, 1, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
         
-        self.chatView = QScrollArea()
-        self.layout.addWidget(self.chatView, 1, 0, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
         
-        self.chatInput = QLineEdit()
-        self.layout.addWidget(self.chatInput, 2, 0, 1, 1, Qt.AlignCenter | Qt.AlignHCenter)
+        self.messageHistoryCount = 0
+        self.messageHistory = QListWidget()
         
-        self.chatButton = QPushButton("Küldés")
-        self.layout.addWidget(self.chatButton, 2, 1, 1, 1, Qt.AlignCenter | Qt.AlignHCenter)
+        gridChatRoom = QGridLayout()
+
+        self.scrollRecords = QScrollArea()
+        self.scrollRecords.setWidget(self.messageHistory)
+        self.font_ = self.scrollRecords.font()
+        self.font_.setPointSize(17)
+        self.scrollRecords.setFont(self.font_)
+        self.scrollRecords.setWidgetResizable(True)
+        # self.sendComboBox.activated[str].connect(self.send_choice)
+        self.lineEdit = QLineEdit()
+        self.lineEdit.setFont(self.font_)
+        self.lineEnterBtn = QPushButton("Enter")
+        self.lineEnterBtn.setFixedSize(100, 50)
+        # self.lineEnterBtn.clicked.connect(self.enter_line)
+        # self.lineEdit.returnPressed.connect(self.enter_line)
         
-        # self.asd = QLabel("LAS")
-        # self.layout.addWidget(self.asd, 0, 0)
+        self.emojiBox = QGroupBox("Emoji")
+        self.emojiBtn1 = QPushButton("ก็ʕ•͡ᴥ•ʔ ก้")
+        self.emojiBtn1.clicked.connect(lambda: self.sendEmoji("ก็ʕ•͡ᴥ•ʔ ก้"))
+        self.emojiBtn2 = QPushButton("(｡◕∀◕｡)")
+        self.emojiBtn2.clicked.connect(lambda: self.sendEmoji("(｡◕∀◕｡)"))
+        self.emojiBtn3 = QPushButton("( ˘･з･)")
+        self.emojiBtn3.clicked.connect(lambda: self.sendEmoji("( ˘･з･)"))
+        self.emojiBtn4 = QPushButton("ᕦ(ò_óˇ)ᕤ")
+        self.emojiBtn4.clicked.connect(lambda: self.sendEmoji("ᕦ(ò_óˇ)ᕤ"))
+        emojiLayout = QHBoxLayout()
+        emojiLayout.addWidget(self.emojiBtn1)
+        emojiLayout.addWidget(self.emojiBtn2)
+        emojiLayout.addWidget(self.emojiBtn3)
+        emojiLayout.addWidget(self.emojiBtn4)
+        self.emojiBox.setLayout(emojiLayout)
+        gridChatRoom.addWidget(self.scrollRecords,0,0,1,4)
+        gridChatRoom.addWidget(self.lineEdit,2,0,1,3)
+        gridChatRoom.addWidget(self.lineEnterBtn,2,3,1,1)
+        gridChatRoom.addWidget(self.emojiBox,3,0,1,4)
+        gridChatRoom.setColumnStretch(0, 9)
+        gridChatRoom.setColumnStretch(1, 9)
+        gridChatRoom.setColumnStretch(2, 9)
+        gridChatRoom.setColumnStretch(3, 1)
+        gridChatRoom.setRowStretch(0, 9)
         
-        self.setLayout(self.layout)
+        self.lineEnterBtn.clicked.connect(self.sendMessage)
+        
+        self.setLayout(gridChatRoom)
+    
+    def sendMessage(self):
+        sio.emit('messageSent', {'sender': usernameGlobal, 'roomID': roomCode, 'message': self.lineEdit.text()})
+        self.lineEdit.setText("")
+
+    def sendEmoji(self, emoji):
+        sio.emit('messageSent', {'sender': usernameGlobal, 'roomID': roomCode, 'message': emoji})
+    
+
+    @sio.on('messageReceivedByServer')
+    def messageReceivedByServer(message):
+        
+        w.chatroomw.messageHistory.addItem(f"{message['sender']}: {message['message']}")
         
 class CreateRoomWindow(QWidget):
     roomCreated = pyqtSignal()
@@ -634,7 +681,7 @@ class MainWindow(QWidget):
     def openAllRoom(self, before):
         self.allroomw = AllRoom()
         self.allroomw.update()
-        self.allroomw.joiningToRoom.connect(self.joiningRoom)
+        self.allroomw.joiningToRoom.connect(self.joiningOldRoom)
         self.allroomw.show()
         before.close()
         
@@ -646,19 +693,16 @@ class MainWindow(QWidget):
         self.editprofilew.accountInfoChangeSuccesfull.connect(lambda: self.openMainMenu(self.editprofilew))
         before.close()
         
-    def joiningRoom(self):
+    def joiningNewRoom(self):
         sio.emit('joinRoom', {"roomID": roomCode})
         sio.on('joinedRoom')
-        try:
-            self.openChatRoom(self.createchatroomw)
-        except:
-            pass
-        try:
-            self.openChatRoom(self.allroomw)
-        except:
-            pass
-        # self.chatroomw = ChatRoomWindow()
-        # self.chatroomw.show()
+        self.openChatRoom(self.createchatroomw)
+
+    def joiningOldRoom(self):
+        sio.emit('joinRoom', {"roomID": roomCode})
+        sio.on('joinedRoom')
+        self.openChatRoom(self.allroomw)
+
         
     def openChatRoom(self, before):
         before.close()

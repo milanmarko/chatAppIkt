@@ -60,7 +60,7 @@ def register():
     email = registrationData['userEmail']
     username = registrationData['userName']
     password = registrationData['password']
-    if db.isUsernameFree(username):
+    if db.isUsernameFree(username, False):
         db.register(email, username, password)
         return {"sikeresE": True}
     else:
