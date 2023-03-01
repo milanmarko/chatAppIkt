@@ -11,9 +11,10 @@ roomCode = ""
 roomName = ""
 messageHistory:QGridLayout
 messageHistoryCounter = 0
-
+serverIp = ""
 sio = socketio.Client()
-sio.connect('http://127.0.0.1:5000')
+
+
 
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()
@@ -131,7 +132,57 @@ class RegWindow(QWidget):
             msg.exec_()
             self.sikeresReg.emit()
         
+
+class IpSelectWindow(QWidget):
+    ipSelectedIsGood = pyqtSignal()
     
+    
+    def __init__(self):
+        super(IpSelectWindow, self).__init__()
+        self.setWindowTitle("Belépés")
+        
+        self.setFixedSize(600,300)
+        
+        self.layout = QGridLayout()
+        self.layout.setContentsMargins(50,50,50,50)
+        self.layout.setHorizontalSpacing(100)
+        
+        [self.layout.setColumnStretch(i, 1) for i in range(2)]
+        [self.layout.setRowStretch(i, 1) for i in range(4)]
+
+        self.title = QLabel("Ip cím választás")
+        self.font_ = self.title.font()
+        self.font_.setPointSize(15)
+        self.title.setFont(self.font_)
+        self.layout.addWidget(self.title, 0, 0, 1, 2, Qt.AlignTop | Qt.AlignHCenter)
+        
+        self.ipLabel = QLabel("Ip cím és portszám:")
+        self.ipLabel.setFont(self.font_)
+        self.layout.addWidget(self.ipLabel, 1, 0, 1, 1, Qt.AlignCenter | Qt.AlignRight)
+        
+        self.ipInput = QLineEdit()
+        self.font_.setPointSize(12)
+        self.ipInput.setFont(self.font_)
+        self.ipInput.setFixedSize(200, 30)
+        self.layout.addWidget(self.ipInput, 1, 1, 1, 1, Qt.AlignCenter | Qt.AlignLeft)
+        
+        self.okButton = QPushButton("Tovább")
+        self.okButton.setFixedSize(150, 50)
+        self.layout.addWidget(self.okButton, 3, 0, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
+        
+        self.setLayout(self.layout)
+
+    def serverCheck(self):
+        ip = self.ipInput.text()
+        try:
+            r = requests.post(f"http://{ip}/checkConnection")
+            r = r.json()
+            if r["connected"]:
+                self.ipSelectedIsGood.emit()
+                # Ide még meg kell írni a maradékot, messagebox, server side
+        except:
+            pass
+
 class LoginWindow(QWidget):
     
     sikeresLogin = pyqtSignal()
@@ -646,11 +697,21 @@ class MainWindow(QWidget):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setFixedSize(1000, 700)
-        self.loginw = LoginWindow()
-        self.loginw.show()
-        self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
-        self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))        
-        # self.setCentralWidget(self.loginw)
+        
+        self.ipselectw = IpSelectWindow()
+        self.ipselectw.show()
+        
+        
+    #     self.loginw = LoginWindow()
+    #     self.loginw.show()
+    #     self.loginw.toRegButton.clicked.connect(lambda: self.openReg(self.loginw))
+    #     self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))        
+    #     # self.setCentralWidget(self.loginw)
+    
+    def sioLogin(self):
+        global sio
+        sio.connect('http://127.0.0.1:5000')
+        
         
     def openReg(self, before):
         before.close()
@@ -712,7 +773,7 @@ class MainWindow(QWidget):
     def openCreateChatRoom(self, before):
         before.close()
         self.createchatroomw = CreateRoomWindow()
-        self.createchatroomw.roomCreated.connect(self.joiningRoom)
+        self.createchatroomw.roomCreated.connect(self.joiningNewRoom)
         self.createchatroomw.show()
         
     
