@@ -1,15 +1,16 @@
 import mysql.connector, datetime
 
 class Adatbazis:
+    pass
     
     def __init__(self) -> None:
         self.db = mysql.connector.connect(
-                host= 'localhost',
-                user= 'root',
-                password= '',
-                database= 'chatApp'
+            host= 'localhost',
+            user= 'root',
+            password= '',
+            database= 'chatApp'
         
-        )
+            )
         
     def getAllRooms(self):
         with self.db.cursor() as cursor:

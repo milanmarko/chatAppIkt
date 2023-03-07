@@ -117,6 +117,11 @@ def loginHtml():
 def registrationHtml():
     return render_template('register.html')
 
+
+@app.route('/chat', methods= ["GET"])
+def chatHtml():
+    return render_template('chat.html')
+
 @app.route('/rooms/createRoom', methods = ["POST"])
 def createRoom():
     incomingRequest = request.form
