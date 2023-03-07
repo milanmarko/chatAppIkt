@@ -11,7 +11,7 @@ roomCode = ""
 roomName = ""
 messageHistory:QGridLayout
 messageHistoryCounter = 0
-serverIp = ""
+serverIp = "" 
 sio = socketio.Client()
 
 
@@ -117,7 +117,7 @@ class RegWindow(QWidget):
         email = self.emailOneInput.text()
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
-        r = requests.post('http://localhost:5000/account/register', {"userEmail": email, "userName": username, "password": password})
+        r = requests.post(f'http://{serverIp}/account/register', {"userEmail": email, "userName": username, "password": password})
         r = r.json()
         if not r["sikeresE"] :
             if r["isUsernameUsed"]:
@@ -168,6 +168,7 @@ class IpSelectWindow(QWidget):
         
         self.okButton = QPushButton("Tovább")
         self.okButton.setFixedSize(150, 50)
+        self.okButton.clicked.connect(self.serverCheck)
         self.layout.addWidget(self.okButton, 3, 0, 1, 2, Qt.AlignCenter | Qt.AlignHCenter)
         
         self.setLayout(self.layout)
@@ -178,10 +179,22 @@ class IpSelectWindow(QWidget):
             r = requests.post(f"http://{ip}/checkConnection")
             r = r.json()
             if r["connected"]:
+                global sio
+                sio.connect(f"http://{ip}")
+                global serverIp
+                serverIp = ip
+                msg = QMessageBox()
+                msg.setText("Sikeres csatlakozás!")
+                msg.setWindowTitle("Csatlakozva")
+                msg.setIcon(QMessageBox.Information)
+                msg.exec_()
                 self.ipSelectedIsGood.emit()
-                # Ide még meg kell írni a maradékot, messagebox, server side
         except:
-            pass
+            msg = QMessageBox()
+            msg.setText("Sikertelen csatlakozás!")
+            msg.setWindowTitle("Sikertelen csatlakozás")
+            msg.setIcon(QMessageBox.Critical)
+            msg.exec_()
 
 class LoginWindow(QWidget):
     
@@ -253,7 +266,7 @@ class LoginWindow(QWidget):
         global passwordGlobal
         passwordGlobal = password
         print(f"Login Api request küldve: {datetime.datetime.now()}")
-        r = requests.post('http://localhost:5000/account/login', {"userName": username, "password": password})
+        r = requests.post(f'http://{serverIp}/account/login', {"userName": username, "password": password})
         r = r.json()
         print(f"Login Api request megkapva: {datetime.datetime.now()}")
         
@@ -344,7 +357,7 @@ class EditProfile(QWidget):
 
     
     def update(self):
-        # r = requests.post('http://localhost:5000/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
+        # r = requests.post(f'http://{serverIp}/account/getAccountInfo', {"username": usernameGlobal, "password": passwordGlobal})
         # r = r.json()
         self.emailLabel = QLabel("Email cím:")
         self.font_ = self.emailLabel.font()
@@ -457,9 +470,9 @@ class EditProfile(QWidget):
                 msg.setWindowTitle("Sikertelen jelszóváltoztatás")
                 msg.exec_()
                 return
-            r = requests.post('http://localhost:5000/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": oldPassword, "newPassword": newPasswordOne, "isUsernameBeingChanged": isUsernameBeingChanged})
+            r = requests.post(f'http://{serverIp}/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": oldPassword, "newPassword": newPasswordOne, "isUsernameBeingChanged": isUsernameBeingChanged})
         else:
-            r = requests.post('http://localhost:5000/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": passwordGlobal, "newPassword": "", "isUsernameBeingChanged": isUsernameBeingChanged})
+            r = requests.post(f'http://{serverIp}/account/editAccountInfo', {"newEmail": newEmail, "newUsername": newUsername, "oldUsername": usernameGlobal, "oldPassword": passwordGlobal, "newPassword": "", "isUsernameBeingChanged": isUsernameBeingChanged})
         r = r.json()
         
         if r["sikeresE"]:
@@ -503,7 +516,7 @@ class AllRoom(QWidget):
         [self.layout.setRowStretch(i, 1) for i in range(1)]
         
     def update(self):
-        r = requests.get('http://localhost:5000/rooms/getAll')
+        r = requests.get(f'http://{serverIp}/rooms/getAll')
         self.rooms = r.json()["rooms"]
         
         self.tableWidget = QTableWidget()
@@ -673,7 +686,7 @@ class CreateRoomWindow(QWidget):
     def createRoom(self):
         name = self.chatRoomNameInput.text()
         private = self.privateCheckBox.isChecked()
-        r = requests.post('http://localhost:5000/rooms/createRoom', {"roomName":name, "private": private})
+        r = requests.post(f'http://{serverIp}/rooms/createRoom', {"roomName":name, "private": private})
         r = r.json()
         if r["successful"]:
             global roomCode
@@ -700,6 +713,7 @@ class MainWindow(QWidget):
         
         self.ipselectw = IpSelectWindow()
         self.ipselectw.show()
+        self.ipselectw.ipSelectedIsGood.connect(lambda: self.openLogin(self.ipselectw))
         
         
     #     self.loginw = LoginWindow()
@@ -708,9 +722,10 @@ class MainWindow(QWidget):
     #     self.loginw.sikeresLogin.connect(lambda: self.openMainMenu(self.loginw))        
     #     # self.setCentralWidget(self.loginw)
     
-    def sioLogin(self):
+
+    def sioLogin(self, ip):
         global sio
-        sio.connect('http://127.0.0.1:5000')
+        sio.connect(ip)
         
         
     def openReg(self, before):

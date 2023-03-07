@@ -125,3 +125,7 @@ def createRoom():
         db.createNewRoom(incomingRequest['roomName'], roomCode, incomingRequest['private'])
         return {"successful": True, "roomCode": roomCode, "nameError": False}
     return {"successful": False, "roomCode": "", "nameError": True}
+
+@app.route('/checkConnection', methods = ["POST"])
+def checkConnection():
+    return {"connected":True}
