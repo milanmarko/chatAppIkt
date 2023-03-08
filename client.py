@@ -9,8 +9,6 @@ passwordGlobal = ""
 emailGlobal = ""
 roomCode = ""
 roomName = ""
-messageHistory:QGridLayout
-messageHistoryCounter = 0
 serverIp = "" 
 sio = socketio.Client()
 
@@ -448,7 +446,7 @@ class EditProfile(QWidget):
             
     def changeAccountInfo(self):
         isUsernameBeingChanged = True
-        global usernameGlobal
+        global usernameGlobal, passwordGlobal, emailGlobal
         newEmail = self.newEmailInput.text()
         if newEmail == "":
             global emailGlobal
@@ -513,7 +511,9 @@ class AllRoom(QWidget):
         self.layout.setContentsMargins(50,50,50,50)
         self.layout.setHorizontalSpacing(100)
         [self.layout.setColumnStretch(i, 1) for i in range(1)]
-        [self.layout.setRowStretch(i, 1) for i in range(1)]
+        # [self.layout.setRowStretch(i, 1) for i in range(2)]
+        self.layout.setRowStretch(0, 5)
+        self.layout.setRowStretch(1, 1)
         
     def update(self):
         r = requests.get(f'http://{serverIp}/rooms/getAll')
@@ -536,6 +536,11 @@ class AllRoom(QWidget):
         self.tableWidget.setEditTriggers(QTableWidget.NoEditTriggers)
         
         self.layout.addWidget(self.tableWidget, 0, 0)
+        
+        self.backButton = QPushButton("Vissza")
+        self.backButton.setFixedSize(150, 50)
+        self.layout.addWidget(self.backButton, 1, 0, Qt.AlignCenter | Qt.AlignHCenter)
+        
         self.setLayout(self.layout)
 
     def connectToRoom(self, roomName_, roomCode_):
@@ -567,8 +572,6 @@ class ChatRoomWindow(QWidget):
         
         self.title = QLabel(f"Chatszoba: {roomName}")
         
-        
-        self.messageHistoryCount = 0
         self.messageHistory = QListWidget()
         
         gridChatRoom = QGridLayout()
@@ -597,12 +600,15 @@ class ChatRoomWindow(QWidget):
         self.emojiBtn4 = QPushButton("ᕦ(ò_óˇ)ᕤ")
         self.emojiBtn4.clicked.connect(lambda: self.sendEmoji("ᕦ(ò_óˇ)ᕤ"))
         emojiLayout = QHBoxLayout()
+        self.backButton = QPushButton("Vissza")
+        self.backButton.setFixedSize(100, 50)
         emojiLayout.addWidget(self.emojiBtn1)
         emojiLayout.addWidget(self.emojiBtn2)
         emojiLayout.addWidget(self.emojiBtn3)
         emojiLayout.addWidget(self.emojiBtn4)
         self.emojiBox.setLayout(emojiLayout)
-        gridChatRoom.addWidget(self.scrollRecords,0,0,1,4)
+        gridChatRoom.addWidget(self.scrollRecords,0,0,2,3)
+        gridChatRoom.addWidget(self.backButton,1,3, Qt.AlignCenter | Qt.AlignRight)
         gridChatRoom.addWidget(self.lineEdit,2,0,1,3)
         gridChatRoom.addWidget(self.lineEnterBtn,2,3,1,1)
         gridChatRoom.addWidget(self.emojiBox,3,0,1,4)
@@ -613,7 +619,8 @@ class ChatRoomWindow(QWidget):
         gridChatRoom.setRowStretch(0, 9)
         
         self.lineEnterBtn.clicked.connect(self.sendMessage)
-        
+
+
         self.setLayout(gridChatRoom)
     
     def sendMessage(self):
@@ -759,6 +766,7 @@ class MainWindow(QWidget):
         self.allroomw.update()
         self.allroomw.joiningToRoom.connect(self.joiningOldRoom)
         self.allroomw.show()
+        self.allroomw.backButton.clicked.connect(lambda: self.openMainMenu(self.allroomw))
         before.close()
         
     def openEditProfile(self, before):
@@ -780,9 +788,21 @@ class MainWindow(QWidget):
         self.openChatRoom(self.allroomw)
 
         
+    def leaveChatRoom(self):
+        msg = QMessageBox()
+        choice = msg.question(self, "Kilépés", "Biztos ki szeretnél lépni?", QMessageBox.Yes | QMessageBox.No)
+        if choice == QMessageBox.Yes:
+            r = requests.post(f"http://{serverIp}/rooms/leaveRoom", {"roomID": roomCode})
+            r = r.json()
+            if r["successful"]:
+                self.openAllRoom(self.chatroomw)
+            
+        
+        
     def openChatRoom(self, before):
         before.close()
         self.chatroomw = ChatRoomWindow()
+        self.chatroomw.backButton.clicked.connect(self.leaveChatRoom)
         self.chatroomw.show()
         
     def openCreateChatRoom(self, before):

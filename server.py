@@ -134,3 +134,9 @@ def createRoom():
 @app.route('/checkConnection', methods = ["POST"])
 def checkConnection():
     return {"connected":True}
+
+@app.route('/rooms/leaveRoom', methods = ["POST"])
+def leaveRoom():
+    incomingRequest = request.form
+    db.leaveFromRoom(incomingRequest["roomID"])
+    return {"successful": True}
