@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/all.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/account.css')}}" />
+		<title>Bejelentkezve mint:</title>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-12 d-flex justify-content-center mt-5">
+					<h1 id="topH">Bejelentkezve mint:</h1>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 d-flex justify-content-center mt-5">
+					<a href="rooms/newRoom"
+						><input type="button" value="Új szoba létrehozás" id="createNewRoomButton" class="btn uf-btn-primary accountButton btn-lg"
+					/></a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 d-flex justify-content-center mt-5">
+					<a href="rooms/joinRoom"><input type="button" value="Belépés Chatszobába" id="joinRoomButton" class="btn uf-btn-primary accountButton btn-lg" /></a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 d-flex justify-content-center mt-5">
+					<a href="account/editAccount"
+						><input type="button" value="Profil módosítása" id="changeProfileButton" class="btn uf-btn-primary accountButton btn-lg"
+					/></a>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-12 d-flex justify-content-center mt-5">
+					<input type="button" value="Kijelentkezés" id="logOutButton" class="btn uf-btn-primary accountButton btn-lg" />
+				</div>
+			</div>
+		</div>
+	</body>
+	<script
+		src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+		integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+		crossorigin="anonymous"
+	></script>
+	<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+	<script src="{{ url_for('static', filename='js/account.js')}}"></script>
+</html>
