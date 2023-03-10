@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests, datetime, socketio, functools
+import hashlib, requests, datetime, socketio
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
