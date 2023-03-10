@@ -5,16 +5,21 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Bejelentkezés</title>
-		<link rel="icon" type="image/png" href="../static/img/logo.png" />
-		<link rel="stylesheet" href="../static/css/all.min.css">
-		<link rel="stylesheet" href="../static/css/bootstrap.min.css" />
-		<link rel="stylesheet" href="../static/css/style2.css">
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+		<link rel="icon" type="image/png" href="{{url_for('static', filename='img/logo.png')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/all.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/boostrap.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/style2.css')}}" />
+		<link
+			rel="stylesheet"
+			href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css"
+			integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+			crossorigin="anonymous"
+		/>
 	</head>
 	<body>
 		<div class="uf-form-signin">
 			<div class="text-center">
-				<a href="https://uifresh.net/"><img src="../static/img/logo.png" alt="" width="100" height="100" /></a>
+				<img src="{{url_for('static', filename='img/logo.png')}}" alt="" width="100" height="100" />
 				<h1 class="text-white h3">Bejelentkezés</h1>
 			</div>
 			<form class="mt-4">
@@ -27,14 +32,14 @@
 					<input id="passwordInput" type="password" class="form-control" placeholder="Jelszó" />
 				</div>
 				<div class="d-flex mb-3 justify-content-between">
-					<div class="form-check">
+					<!-- <div class="form-check">
 						<input type="checkbox" class="form-check-input uf-form-check-input" id="exampleCheck1" />
 						<label class="form-check-label text-white" for="exampleCheck1">Jegyezd meg</label>
 					</div>
-					<a href="#">Elfelejtettem a jelszavam</a>
+					<a href="#">Elfelejtettem a jelszavam</a> -->
 				</div>
-				<div class="d-grid mb-4">
-					<button type="submit" class="btn uf-btn-primary btn-lg">Login</button>
+				<div class="d-flex justify-content-center mb-4">
+					<input id="submitButton" type="button" onclick="login()" class="btn uf-btn-primary btn-lg" value="Login" />
 				</div>
 				<div class="d-flex mb-3">
 					<div class="dropdown-divider m-auto w-25"></div>
@@ -43,7 +48,7 @@
 				</div>
 				<div class="mt-4 text-center">
 					<span class="text-white">Nincs még fiókod?</span>
-					<a href="register.html">Regisztrálj!</a>
+					<a href="registration">Regisztrálj!</a>
 				</div>
 			</form>
 		</div>
@@ -54,6 +59,7 @@
 		></script>
 		<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
 		<script src="{{ url_for('static', filename='js/script.js')}}"></script>
+		<script src="{{ url_for('static', filename='js/jquery.md5.js')}}"></script>
 		<script src="https://kit.fontawesome.com/9a88852d05.js" crossorigin="anonymous"></script>
 	</body>
 </html>

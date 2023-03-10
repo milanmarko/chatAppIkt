@@ -140,3 +140,7 @@ def leaveRoom():
     incomingRequest = request.form
     db.leaveFromRoom(incomingRequest["roomID"])
     return {"successful": True}
+
+@app.route('/account', methods = ["GET"])
+def accountHtml():
+    return render_template("account.html")
