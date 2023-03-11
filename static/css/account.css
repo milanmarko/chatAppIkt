@@ -10,7 +10,16 @@ body {
 }
 
 #submitButton:hover,
-.accountButton {
+.accountButton:hover {
+	color: white;
 	border: 2px solid #5a1118;
 	background-color: #5a1118;
+}
+
+#label {
+	font-size: 2rem;
+}
+
+.form-control {
+	font-size: 1.3rem;
 }

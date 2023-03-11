@@ -18,3 +18,5 @@ $(document).ready(() => {
 	document.title = `Bejelentkezve mint ${cookieGetter("username")}`;
 	$("#topH").text(`Bejelentkezve mint: ${cookieGetter("username")}`);
 });
+
+const editPassword = () => {};
