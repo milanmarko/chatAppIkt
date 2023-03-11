@@ -19,4 +19,9 @@ $(document).ready(() => {
 	$("#topH").text(`Bejelentkezve mint: ${cookieGetter("username")}`);
 });
 
-const editPassword = () => {};
+const logOut = () => {
+	document.cookie = "username=";
+	document.cookie = "password=";
+	document.cookie = "roomCode=";
+	location.href = "../login";
+};

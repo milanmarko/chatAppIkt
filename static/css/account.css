@@ -23,3 +23,20 @@ body {
 .form-control {
 	font-size: 1.3rem;
 }
+
+@media only screen and (orientation: portrait) {
+	#privateCheckInput {
+		width: 3vh;
+		height: 3vh;
+	}
+}
+
+@media only screen and (orientation: landscape) {
+	#privateCheckInput {
+		width: 3vw;
+	}
+}
+
+#roomTable {
+	table-layout: fixed;
+}

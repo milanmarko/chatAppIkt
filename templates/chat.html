@@ -1,67 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../static/css/chat.css" />
-    <link rel="stylesheet" href="../static/js/chat.js" />
-    <title>Chat</title>
-</head>
-<body>
-    <section class="msger">
-        <header class="msger-header">
-          <div class="msger-header-title">
-            <i class="fas fa-comment-alt"></i> ChatApp
-          </div>
-          <div class="msger-header-options">
-            <span><i class="fas fa-cog"></i></span>
-          </div>
-        </header>
-      
-        <main class="msger-chat">
-          <div class="msg left-msg">
-            <div
-             class="msg-img"
-             style="background-image: url(https://image.flaticon.com/icons/svg/327/327779.svg)"
-            ></div>
-      
-            <div class="msg-bubble">
-              <div class="msg-info">
-                <div class="msg-info-name">Milán</div>
-                <div class="msg-info-time">12:45</div>
-              </div>
-      
-              <div class="msg-text">
-                Kuki
-              </div>
-            </div>
-          </div>
-      
-          <div class="msg right-msg">
-            <div
-             class="msg-img"
-             style="background-image: url(https://image.flaticon.com/icons/svg/145/145867.svg)"
-            ></div>
-      
-            <div class="msg-bubble">
-              <div class="msg-info">
-                <div class="msg-info-name">Vendi</div>
-                <div class="msg-info-time">12:46</div>
-              </div>
-      
-              <div class="msg-text">
-                Muki
-              </div>
-            </div>
-          </div>
-        </main>
-      
-        <form class="msger-inputarea">
-          <input type="text" class="msger-input" placeholder="Üzenet...">
-          <button type="submit" class="msger-send-btn">Küldés</button>
-        </form>
-      </section>
-    
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/chat.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='js/chat.js')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/all.min.css')}}" />
+		<title>Chat</title>
+	</head>
+	<body>
+		<section class="msger">
+			<header class="msger-header">
+				<div class="msger-header-title"><i class="fas fa-comment-alt"></i> ChatApp</div>
+				<div>
+					<a href="../account">
+						<input type="button" onclick="leaveRoom()" class="btn btn-danger" value="Vissza" />
+					</a>
+				</div>
+			</header>
+
+			<main class="msger-chat" id="messenger"></main>
+
+			<div class="msger-inputarea">
+				<input type="text" id="messageInput" class="msger-input" placeholder="Üzenet..." />
+				<input type="button" value="Küldés" onclick="sendMessage()" class="msger-send-btn" />
+			</div>
+		</section>
+		<script src="https://code.jquery.com/jquery-3.6.3.js" integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
+		<script
+			src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+			integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+			crossorigin="anonymous"
+		></script>
+
+		<script src="{{ url_for('static', filename='js/chat.js')}}"></script>
+	</body>
 </html>

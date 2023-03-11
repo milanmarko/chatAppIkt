@@ -35,6 +35,7 @@ def onRoomJoinRequest(_roomCode):
     roomCode = _roomCode['roomID']
     join_room(room = roomCode)
     roomName = db.joinRoom(roomCode)
+    print(_roomCode)
     emit('joinedRoom', {'nev': roomName[0]})
     
 # @socketio.on('getAllRoom')
@@ -68,12 +69,10 @@ def register():
     
 @app.route('/account/login', methods = ["POST"])
 def login():
-    print(f"Login megkezdése: {datetime.datetime.now()}")
     loginData = request.form
     username = loginData['userName']
     password = loginData['password']
     loginTp = db.login(username, password)
-    print(f"Login kész: {datetime.datetime.now()}")
     if loginTp[0]:
         return {"sikeresE": True, "data": loginTp[1]}
     return {"sikeresE": False}
@@ -92,7 +91,6 @@ def getAllRoom():
     for room in rooms:
         # if not room[4]:
         roomsListToReturn.append((room[1], room[3], room[2]))
-    
     return {"rooms": roomsListToReturn}
 
 @app.route('/index', methods= ["GET"])
@@ -148,3 +146,12 @@ def accountHtml():
 @app.route('/account/editAccount', methods = ["GET"])
 def editAccountHtml():
     return render_template("editAccount.html")
+
+@app.route('/rooms/newRoom', methods = ["GET"])
+def createRoomHtml():
+    return render_template("createRoom.html")
+
+@app.route('/rooms/joinRoom', methods = ["GET"])
+def joinRoomHtml():
+    return render_template("joinRoom.html")
+
