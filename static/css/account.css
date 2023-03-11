@@ -1,0 +1,42 @@
+body {
+	background-image: linear-gradient(to right, #f12711, #f5af19);
+}
+
+#submitButton,
+.accountButton {
+	color: white;
+	border: 2px solid #842029;
+	background-color: #842029;
+}
+
+#submitButton:hover,
+.accountButton:hover {
+	color: white;
+	border: 2px solid #5a1118;
+	background-color: #5a1118;
+}
+
+#label {
+	font-size: 2rem;
+}
+
+.form-control {
+	font-size: 1.3rem;
+}
+
+@media only screen and (orientation: portrait) {
+	#privateCheckInput {
+		width: 3vh;
+		height: 3vh;
+	}
+}
+
+@media only screen and (orientation: landscape) {
+	#privateCheckInput {
+		width: 3vw;
+	}
+}
+
+#roomTable {
+	table-layout: fixed;
+}
