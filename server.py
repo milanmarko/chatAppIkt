@@ -144,3 +144,7 @@ def leaveRoom():
 @app.route('/account', methods = ["GET"])
 def accountHtml():
     return render_template("account.html")
+
+@app.route('/account/editAccount', methods = ["GET"])
+def editAccountHtml():
+    return render_template("editAccount.html")
