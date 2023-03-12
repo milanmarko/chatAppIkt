@@ -258,18 +258,14 @@ class LoginWindow(QWidget):
         self.setLayout(self.layout)
     
     def login(self):
-        print(f"Login elkezédése: {datetime.datetime.now()}")
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
         global passwordGlobal
         passwordGlobal = password
-        print(f"Login Api request küldve: {datetime.datetime.now()}")
         r = requests.post(f'http://{serverIp}/account/login', {"userName": username, "password": password})
         r = r.json()
-        print(f"Login Api request megkapva: {datetime.datetime.now()}")
         
         if r["sikeresE"]:
-            print("nyom")
             global usernameGlobal
             usernameGlobal = username
             global emailGlobal
@@ -281,7 +277,6 @@ class LoginWindow(QWidget):
             msg.setIcon(QMessageBox.Critical)
             msg.setWindowTitle("Sikertelen bejelentkezés")
             msg.exec_()
-        print(f"Login kész: {datetime.datetime.now()}")
         
             
 
@@ -454,7 +449,6 @@ class EditProfile(QWidget):
         newUsername = self.newUsernameInput.text()
         if newUsername == "":
             global usernameGlobal
-            print(newUsername )
             newUsername = usernameGlobal
             isUsernameBeingChanged = False
         if self.isPasswordBeingEdited:
@@ -783,7 +777,7 @@ class MainWindow(QWidget):
         self.openChatRoom(self.createchatroomw)
 
     def joiningOldRoom(self):
-        sio.emit('joinRoom', {"roomID": roomCode})
+        sio.emit('joinRoom', {"roomID": roomCode, "username": usernameGlobal})
         sio.on('joinedRoom')
         self.openChatRoom(self.allroomw)
 
@@ -792,7 +786,7 @@ class MainWindow(QWidget):
         msg = QMessageBox()
         choice = msg.question(self, "Kilépés", "Biztos ki szeretnél lépni?", QMessageBox.Yes | QMessageBox.No)
         if choice == QMessageBox.Yes:
-            r = requests.post(f"http://{serverIp}/rooms/leaveRoom", {"roomID": roomCode})
+            r = requests.post(f"http://{serverIp}/rooms/leaveRoom", {"roomID": roomCode, "username": usernameGlobal})
             r = r.json()
             if r["successful"]:
                 self.openAllRoom(self.chatroomw)

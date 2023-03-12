@@ -25,7 +25,6 @@ def randomString(stringLength):
 
 @socketio.on('connect')
 def on_connect():
-    print("connect")
     emit('connectedSuccesfully')
     
 
@@ -40,7 +39,6 @@ def onRoomJoinRequest(_roomCode):
 
 @socketio.on('messageSent')
 def on_messageSent(message):
-    print(message['roomID'])
     socketio.emit('messageReceivedByServer', message, to=message['roomID'])
     
 @app.route('/account/register', methods = ["POST"])
@@ -69,7 +67,6 @@ def login():
 def getAccountInfo():
     data = request.form
     userData = db.getAccountInfo(data["username"], data["password"])[0]
-    print(userData)
     return {"username": userData[2], "email": userData[1]}
 
 @app.route('/rooms/getAll', methods = ["GET"])
@@ -125,6 +122,7 @@ def checkConnection():
 def leaveRoom():
     incomingRequest = request.form
     db.leaveFromRoom(incomingRequest["roomID"])
+    socketio.emit('messageReceivedByServer', {"sender": "Szerver", "message": f"{incomingRequest['username']} kilépett!", "roomID": roomCode}, to=roomCode)
     return {"successful": True}
 
 @app.route('/account', methods = ["GET"])
