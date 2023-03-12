@@ -24,6 +24,7 @@ const leaveRoom = () => {
 	if (confirm("Biztos vagy benne?")) {
 		var form = new FormData();
 		form.append("roomID", cookieGetter("roomCode"));
+		form.append("username", cookieGetter("username"));
 
 		var settings = {
 			url: `http://${location.host}/rooms/leaveRoom`,
