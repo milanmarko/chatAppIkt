@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Csapatunk</title>
+		<link rel="stylesheet" href="{{url_for('static', filename='css/aboutus.css')}}" />
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+		>
+		<link rel="stylesheet" href="{{url_for('static', filename='css/header.css')}}" />
+		<link rel="icon" type="image/png" href="{{url_for('static', filename='img/logo.png')}}" />
+	</head>
+	<body>
+		<header>
+			<img src="{{url_for('static', filename='img/logo.png')}}" alt="logo" class="logo" />
+
+			<nav class="right">
+				<a href="index">VISSZA</a>
+			</nav>
+		</header>
+		<div class="container">
+			<div class="header">
+				<h1>Csapatunk</h1>
+			</div>
+			<div class="sub-container">
+				<div class="teams">
+					<img src="{{url_for('static', filename='img/Milan.png')}}" alt="" />
+					<div class="name">Markó Milán</div>
+					<div class="design">Fejlesztő</div>
+					<div class="about">
+						<i class="fa fa-envelope"></i> E-mail: marko.milan@students.jedlik.eu <br />
+						<i class="fa fa-phone"></i> Tel: +3620325364
+					</div>
+					<div class="social-links">
+						<a href="https://www.facebook.com/milan.marko.98892"><i class="fa fa-facebook"></i></a>
+						<a href="https://www.instagram.com/milanmarko_/"><i class="fa fa-instagram"></i></a>
+						<a href="https://github.com/milanmarko"><i class="fa fa-github"></i></a>
+					</div>
+				</div>
+				<div class="teams">
+					<img src="{{url_for('static', filename='img/Vendi.png')}}" alt="" />
+					<div class="name">Varga Vendel</div>
+					<div class="design">Designer</div>
+					<div class="about">
+						<i class="fa fa-envelope"></i> E-mail: varga.vendel@students.jedlik.eu <br />
+						<i class="fa fa-phone"></i> Tel: +36202355788
+					</div>
+					<div class="social-links">
+						<a href="https://www.facebook.com/vendel.varga.52/"><i class="fa fa-facebook"></i></a>
+						<a href="https://www.instagram.com/vendy.capelot/"><i class="fa fa-instagram"></i></a>
+						<a href="https://github.com/Vendigamer"><i class="fa fa-github"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

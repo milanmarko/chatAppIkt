@@ -25,6 +25,8 @@ const register = () => {
 			if (resp.sikeresE == true) {
 				alert("Sikeres Regisztráció!");
 				window.location.href = `http://${location.host}/login`;
+			} else {
+				alert("Már van ilyen nevű felhasználó!");
 			}
 		});
 	}

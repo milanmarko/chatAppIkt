@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+	<head>
+		<meta charset="utf-8" />
+		<title>Kliens</title>
+		<link rel="stylesheet" href="{{url_for('static', filename='css/diastyle.css')}}" />
+		<link rel="stylesheet" href="{{url_for('static', filename='css/mainstyle.css')}}" />
+		<link rel="icon" type="image/png" href="{{url_for('static', filename='img/logo.png')}}" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="navbar">
+				<img src="{{url_for('static', filename='img/logo.png')}}" class="logo" />
+				<nav>
+					<ul>
+						<li><a href="index">MENÜ</a></li>
+						<li><a href="login">ÜZENETEK</a></li>
+						<li><a href="aboutus">RÓLUNK</a></li>
+					</ul>
+				</nav>
+				<img src="{{url_for('static', filename='img/menu.png')}}" class="menu-icon" />
+			</div>
+		</div>
+		<div class="slidershow middle">
+			<div class="slides">
+				<input type="radio" name="r" id="r1" checked />
+				<input type="radio" name="r" id="r2" />
+				<input type="radio" name="r" id="r3" />
+				<input type="radio" name="r" id="r4" />
+				<input type="radio" name="r" id="r5" />
+				<div class="slide s1">
+					<img src="{{url_for('static', filename='img/client/client1.png')}}" alt="" />
+				</div>
+				<div class="slide">
+					<img src="{{url_for('static', filename='img/client/client2.png')}}" alt="" />
+				</div>
+				<div class="slide">
+					<img src="{{url_for('static', filename='img/client/client3.png')}}" alt="" />
+				</div>
+				<div class="slide">
+					<img src="{{url_for('static', filename='img/client/client4.png')}}" alt="" />
+				</div>
+				<div class="slide">
+					<img src="{{url_for('static', filename='img/client/client5.png')}}" alt="" />
+				</div>
+			</div>
+
+			<div class="navigation">
+				<label for="r1" class="bar"></label>
+				<label for="r2" class="bar"></label>
+				<label for="r3" class="bar"></label>
+				<label for="r4" class="bar"></label>
+				<label for="r5" class="bar"></label>
+			</div>
+		</div>
+	</body>
+</html>

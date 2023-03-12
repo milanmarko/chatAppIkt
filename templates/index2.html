@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>ChatApp</title>
+		<link rel="stylesheet" href="{{url_for('static', filename='css/mainstyle.css')}}" />
+		<link rel="stylesheet" href="https://fonts.google.com/css2?family=Roboto:wght@400;700&display=swap" />
+		<link rel="icon" type="image/png" href="{{url_for('static', filename='img/logo.png')}}" />
+	</head>
+	<body>
+		<div class="container">
+			<div class="navbar">
+				<img src="{{url_for('static', filename='img/logo.png')}}" class="logo" />
+				<nav>
+					<ul>
+						<!-- <li><a href="chat.html">ÜZENETEK</a></li> -->
+						<li><a href="aboutus">RÓLUNK</a></li>
+					</ul>
+				</nav>
+				<img src="{{url_for('static', filename='img/menu.png')}}" class="menu-icon" />
+			</div>
+
+			<div class="row">
+				<div class="col">
+					<h1>ChatApp</h1>
+					<p>
+						A ChatApp egy kommunikációra használható számitógépes applikáció. <br />
+						Ezt elérni szobák létrehozásával, vagy már létező szobákhoz való csatlakozással érhetjük el
+					</p>
+					<a href="login"><button class="buttonhover" type="button">Bejelentkezés</button></a>
+				</div>
+				<div class="col">
+					<a href="server">
+						<div class="card card1">
+							<h5>Szerver</h5>
+							<p>A program alapvető működése</p>
+						</div>
+					</a>
+					<a href="client">
+						<div class="card card2">
+							<h5>Kliens</h5>
+							<p>A program üzemeltetése</p>
+						</div>
+					</a>
+					<a href="userinterface">
+						<div class="card card3">
+							<h5>Felhasználói felület</h5>
+							<p>A program kinézete</p>
+						</div>
+					</a>
+					<a href="database">
+						<div class="card card4">
+							<h5>Adatbázis</h5>
+							<p>Szobákhoz és a felhasználóhoz kapcsolodó műveletek</p>
+						</div>
+					</a>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

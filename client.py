@@ -778,7 +778,7 @@ class MainWindow(QWidget):
         before.close()
         
     def joiningNewRoom(self):
-        sio.emit('joinRoom', {"roomID": roomCode})
+        sio.emit('joinRoom', {"roomID": roomCode, "username": usernameGlobal})
         sio.on('joinedRoom')
         self.openChatRoom(self.createchatroomw)
 

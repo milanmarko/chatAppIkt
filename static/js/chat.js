@@ -46,7 +46,7 @@ const leaveRoom = () => {
 
 // document.title = `Szoba: ${cookieGetter("roomCode")}`;
 const socket = io();
-socket.emit("joinRoom", { roomID: cookieGetter("roomCode") });
+socket.emit("joinRoom", { roomID: cookieGetter("roomCode"), username: cookieGetter("username") });
 socket.on("messageReceivedByServer", (message) => {
 	const messageDate = new Date();
 	var date = "";

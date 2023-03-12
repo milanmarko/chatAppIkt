@@ -35,20 +35,8 @@ def onRoomJoinRequest(_roomCode):
     roomCode = _roomCode['roomID']
     join_room(room = roomCode)
     roomName = db.joinRoom(roomCode)
-    print(_roomCode)
     emit('joinedRoom', {'nev': roomName[0]})
-    
-# @socketio.on('getAllRoom')
-# def getAllRoom():
-#     sendLista = []
-#     codes = []
-#     lista = db.getAllRooms()
-#     for elem in lista:
-#         sendLista.append(f"{elem[1]}\t\t\t{elem[3]}")
-#         codes.append(elem[2])
-#     print(sendLista)
-#     socketio.emit('allRoom', {'list': sendLista, 'codes':codes})
-
+    socketio.emit('messageReceivedByServer', {"sender": "Szerver", "message": f"{_roomCode['username']} csatlakozott!", "roomID": roomCode}, to=roomCode)
 
 @socketio.on('messageSent')
 def on_messageSent(message):
@@ -95,7 +83,7 @@ def getAllRoom():
 
 @app.route('/index', methods= ["GET"])
 def index():
-    return render_template('index.html')
+    return render_template('index2.html')
 
 @app.route('/account/editAccountInfo', methods = ["POST"])
 def editAccountInfo():
@@ -155,3 +143,22 @@ def createRoomHtml():
 def joinRoomHtml():
     return render_template("joinRoom.html")
 
+@app.route('/database', methods = ["GET"])
+def databaseHtml():
+    return render_template("database.html")
+
+@app.route('/client', methods = ["GET"])
+def clientHtml():
+    return render_template("client.html")
+
+@app.route('/server', methods = ["GET"])
+def serverHtml():
+    return render_template("server.html")
+
+@app.route('/userinterface', methods = ["GET"])
+def userinterfaceHtml():
+    return render_template("userinterface.html")
+
+@app.route('/aboutus', methods = ["GET"])
+def aboutusHtml():
+    return render_template("aboutus.html")

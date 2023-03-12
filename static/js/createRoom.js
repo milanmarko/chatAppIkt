@@ -22,6 +22,8 @@ const createRoom = () => {
 			document.cookie = `roomCode=${resp.roomCode}; path=/`;
 			alert("Szoba sikeresen létrehozva");
 			location.href = `http://${location.host}/chat`;
+		} else {
+			alert("A szoba neve foglalt!");
 		}
 	});
 };

@@ -23,6 +23,8 @@ function login() {
 			document.cookie = `password=${password}`;
 
 			window.location.href = `http://${location.host}/account`;
+		} else {
+			alert("Hibás felhasználónév vagy jelszó!");
 		}
 	});
 }
