@@ -14,10 +14,21 @@ const cookieGetter = (cname) => {
 	return "";
 };
 
+const keyboardHandler = (e) => {
+	const key = e.key;
+	if (key === "Enter") {
+		sendMessage();
+	}
+};
+
+document.onkeyup = keyboardHandler;
+
 const sendMessage = () => {
 	const message = $("#messageInput").val();
-	$("#messageInput").val("");
-	socket.emit("messageSent", { sender: cookieGetter("username"), roomID: cookieGetter("roomCode"), message: message });
+	if (message !== "") {
+		$("#messageInput").val("");
+		socket.emit("messageSent", { sender: cookieGetter("username"), roomID: cookieGetter("roomCode"), message: message.trim() });
+	}
 };
 
 const leaveRoom = () => {
@@ -54,14 +65,17 @@ socket.on("messageReceivedByServer", (message) => {
 	var date = "";
 
 	if (messageDate.getHours() < 10) {
-		date += "0" + messageDate.getHours().toString();
+		date += "0";
+		date += messageDate.getHours().toString();
 	} else {
 		date += messageDate.getHours().toString();
 	}
 	if (messageDate.getMinutes < 10) {
-		date += ":0" + messageDate.getMinutes().toString();
+		date += ":0";
+		date += messageDate.getMinutes().toString();
 	} else {
-		date += ":" + messageDate.getMinutes().toString();
+		date += ":";
+		date += messageDate.getMinutes().toString();
 	}
 	var align = "left-msg";
 	if (message.sender === cookieGetter("username")) {
@@ -71,4 +85,6 @@ socket.on("messageReceivedByServer", (message) => {
 	$("#messenger").append(
 		`<div class="msg ${align}"><div class="msg-img"></div><div class="msg-bubble"><div class="msg-info"><div class="msg-info-name">${message.sender}</div><div class="msg-info-time">${date}</div></div><div class="msg-text">${message.message}</div></div></div>`
 	);
+
+	document.getElementById("messenger").scrollTo(0, document.getElementById("messenger").scrollHeight);
 });
