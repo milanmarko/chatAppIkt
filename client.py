@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests, datetime, socketio, functools
+import hashlib, requests, socketio, functools, re
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
@@ -13,6 +13,11 @@ serverIp = ""
 sio = socketio.Client()
 
 
+def checkEmail(email):
+    regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'
+    if re.fullmatch(regex, email):
+        return True
+    return False
 
 class RegWindow(QWidget):
     sikeresReg = pyqtSignal()
@@ -113,6 +118,13 @@ class RegWindow(QWidget):
             msg.exec_()
             return
         email = self.emailOneInput.text()
+        if not checkEmail(email):
+            msg.setText("Ilyen e-mail nincs!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("E-mail cím hiba")
+            msg.exec_()
+            return
+        
         username = self.usernameInput.text()
         password = hashlib.md5(self.passwordInput.text().encode('utf-8')).hexdigest()
         r = requests.post(f'http://{serverIp}/account/register', {"userEmail": email, "userName": username, "password": password})
@@ -446,6 +458,13 @@ class EditProfile(QWidget):
         if newEmail == "":
             global emailGlobal
             newEmail = emailGlobal
+        elif not checkEmail(newEmail):
+            msg = QMessageBox()
+            msg.setText("Hibás e-mail cím!")
+            msg.setIcon(QMessageBox.Critical)
+            msg.setWindowTitle("Sikertelen változtatás")
+            msg.exec_()
+            return
         newUsername = self.newUsernameInput.text()
         if newUsername == "":
             global usernameGlobal
@@ -547,7 +566,6 @@ class AllRoom(QWidget):
         roomName = roomName_
         global roomCode
         roomCode = roomCode_
-        print(roomCode)
         self.joiningToRoom.emit()
         
         
@@ -571,6 +589,7 @@ class ChatRoomWindow(QWidget):
         self.layout.setRowStretch(2, 1)
         
         self.title = QLabel(f"Chatszoba: {roomName}")
+        self.setWindowTitle(f"Chatszoba: {roomName}")
         
         self.messageHistory = QListWidget()
         
@@ -783,7 +802,6 @@ class MainWindow(QWidget):
         self.openChatRoom(self.createchatroomw)
 
     def joiningOldRoom(self):
-        print(roomCode)
         sio.emit('joinRoom', {"roomID": roomCode, "username": usernameGlobal})
         sio.on('joinedRoom')
         self.openChatRoom(self.allroomw)
@@ -804,13 +822,13 @@ class MainWindow(QWidget):
         before.close()
         self.chatroomw = ChatRoomWindow()
         self.chatroomw.backButton.clicked.connect(self.leaveChatRoom)
-        print("asd")
         self.chatroomw.show()
         
     def openCreateChatRoom(self, before):
         before.close()
         self.createchatroomw = CreateRoomWindow()
         self.createchatroomw.roomCreated.connect(self.joiningNewRoom)
+        self.createchatroomw.backButton.clicked.connect(lambda: self.openMainMenu(self.createchatroomw))
         self.createchatroomw.show()
         
     
