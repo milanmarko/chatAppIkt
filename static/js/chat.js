@@ -22,6 +22,7 @@ const sendMessage = () => {
 
 const leaveRoom = () => {
 	if (confirm("Biztos vagy benne?")) {
+		socket.emit("leaveFromRoomSIO", { roomID: cookieGetter("roomCode") });
 		var form = new FormData();
 		form.append("roomID", cookieGetter("roomCode"));
 		form.append("username", cookieGetter("username"));

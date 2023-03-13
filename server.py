@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, redirect
 from flask_socketio import SocketIO, join_room, emit, leave_room
 from adatbazisMuveletek import Adatbazis
 import random, string, datetime
@@ -23,6 +23,11 @@ def randomString(stringLength):
     letters = string.ascii_lowercase
     return ''.join(random.choice(letters) for i in range(stringLength))
 
+def loginCheck(r):
+    if r["username"] != "":
+        return True
+    return False
+
 @socketio.on('connect')
 def on_connect():
     emit('connectedSuccesfully')
@@ -41,6 +46,10 @@ def onRoomJoinRequest(_roomCode):
 @socketio.on('messageSent')
 def on_messageSent(message):
     socketio.emit('messageReceivedByServer', message, to=message['roomID'])
+    
+@socketio.on("leaveFromRoomSIO")
+def onLeaveFromRoomSIO(data):
+    leave_room(room=data["roomID"])
     
 @app.route('/account/register', methods = ["POST"])
 def register():
@@ -123,24 +132,45 @@ def checkConnection():
 def leaveRoom():
     incomingRequest = request.form
     db.leaveFromRoom(incomingRequest["roomID"])
+    
     socketio.emit('messageReceivedByServer', {"sender": "Szerver", "message": f"{incomingRequest['username']} kilépett!", "roomID": roomCode}, to=incomingRequest["roomID"])
     return {"successful": True}
 
 @app.route('/account', methods = ["GET"])
 def accountHtml():
-    return render_template("account.html")
+    try:
+        if loginCheck(request.cookies):
+            return render_template("account.html")
+        return redirect('/login', code=302)
+    except:
+        return redirect('/login', code=302)
 
 @app.route('/account/editAccount', methods = ["GET"])
 def editAccountHtml():
-    return render_template("editAccount.html")
+    try:
+        if loginCheck(request.cookies):
+            return render_template("editAccount.html")
+        return redirect('/login', code=302)
+    except:
+        return redirect('/login', code=302)
 
 @app.route('/rooms/newRoom', methods = ["GET"])
 def createRoomHtml():
-    return render_template("createRoom.html")
+    try:
+        if loginCheck(request.cookies):
+            return render_template("createRoom.html")
+        return redirect('/login', code=302)
+    except:
+        return redirect('/login', code=302)
 
 @app.route('/rooms/joinRoom', methods = ["GET"])
 def joinRoomHtml():
-    return render_template("joinRoom.html")
+    try:
+        if loginCheck(request.cookies):
+            return render_template("joinRoom.html")
+        return redirect('/login', code=302)
+    except:
+        return redirect('/login', code=302)
 
 @app.route('/database', methods = ["GET"])
 def databaseHtml():

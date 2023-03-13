@@ -644,6 +644,7 @@ class ChatRoomWindow(QWidget):
     
     def sendMessage(self):
         sio.emit('messageSent', {'sender': usernameGlobal, 'roomID': roomCode, 'message': self.lineEdit.text()})
+        print(roomCode)
         self.lineEdit.setText("")
 
     def sendEmoji(self, emoji):
@@ -812,6 +813,7 @@ class MainWindow(QWidget):
         choice = msg.question(self, "Kilépés", "Biztos ki szeretnél lépni?", QMessageBox.Yes | QMessageBox.No)
         if choice == QMessageBox.Yes:
             r = requests.post(f"http://{serverIp}/rooms/leaveRoom", {"roomID": roomCode, "username": usernameGlobal})
+            sio.emit("leaveFromRoomSIO", {"roomID": roomCode})
             r = r.json()
             if r["successful"]:
                 self.openAllRoom(self.chatroomw)
