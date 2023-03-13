@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QStandardItemModel
 from PyQt5.QtCore import Qt, pyqtSignal
-import hashlib, requests, datetime, socketio
+import hashlib, requests, datetime, socketio, functools
 
 # global usernameGlobal, passwordGlobal, emailGlobal
 usernameGlobal = ""
@@ -494,6 +494,7 @@ class EditProfile(QWidget):
 
 class AllRoom(QWidget):
     joiningToRoom = pyqtSignal()
+
     
     def __init__(self):
         super(AllRoom, self).__init__()
@@ -513,6 +514,8 @@ class AllRoom(QWidget):
         r = requests.get(f'http://{serverIp}/rooms/getAll')
         self.rooms = r.json()["rooms"]
         
+        self.roomDicts = {}        
+        
         self.tableWidget = QTableWidget()
         self.tableWidget.setRowCount(len(self.rooms))
         self.tableWidget.setColumnCount(3)
@@ -522,10 +525,12 @@ class AllRoom(QWidget):
         self.tableWidget.setVerticalHeaderLabels([])
         
         for index, row in enumerate(self.rooms):
+            self.roomDicts[row[0]] = lambda: self.connectToRoom(row[0], row[2])
             self.tableWidget.setItem(index, 0, QTableWidgetItem(row[0]))
             self.tableWidget.setItem(index, 1, QTableWidgetItem(str(row[1])))
             self.tableWidget.setCellWidget(index, 2, QPushButton("Csatlakozás"))
-            self.tableWidget.cellWidget(index, 2).clicked.connect(lambda: self.connectToRoom(row[0], row[2]))    
+            self.tableWidget.cellWidget(index, 2).clicked.connect(functools.partial(self.connectToRoom, row[0], row[2])) 
+           
             
         self.tableWidget.setEditTriggers(QTableWidget.NoEditTriggers)
         
@@ -542,6 +547,7 @@ class AllRoom(QWidget):
         roomName = roomName_
         global roomCode
         roomCode = roomCode_
+        print(roomCode)
         self.joiningToRoom.emit()
         
         
@@ -777,6 +783,7 @@ class MainWindow(QWidget):
         self.openChatRoom(self.createchatroomw)
 
     def joiningOldRoom(self):
+        print(roomCode)
         sio.emit('joinRoom', {"roomID": roomCode, "username": usernameGlobal})
         sio.on('joinedRoom')
         self.openChatRoom(self.allroomw)
@@ -797,6 +804,7 @@ class MainWindow(QWidget):
         before.close()
         self.chatroomw = ChatRoomWindow()
         self.chatroomw.backButton.clicked.connect(self.leaveChatRoom)
+        print("asd")
         self.chatroomw.show()
         
     def openCreateChatRoom(self, before):

@@ -32,6 +32,7 @@ def on_connect():
 @socketio.on('joinRoom')
 def onRoomJoinRequest(_roomCode):
     roomCode = _roomCode['roomID']
+    print(roomCode, _roomCode["username"])
     join_room(room = roomCode)
     roomName = db.joinRoom(roomCode)
     emit('joinedRoom', {'nev': roomName[0]})
@@ -122,7 +123,7 @@ def checkConnection():
 def leaveRoom():
     incomingRequest = request.form
     db.leaveFromRoom(incomingRequest["roomID"])
-    socketio.emit('messageReceivedByServer', {"sender": "Szerver", "message": f"{incomingRequest['username']} kilépett!", "roomID": roomCode}, to=roomCode)
+    socketio.emit('messageReceivedByServer', {"sender": "Szerver", "message": f"{incomingRequest['username']} kilépett!", "roomID": roomCode}, to=incomingRequest["roomID"])
     return {"successful": True}
 
 @app.route('/account', methods = ["GET"])
